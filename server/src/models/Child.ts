@@ -1,0 +1,1 @@
+export type { ChildRecord as IChild } from '../types/entities';

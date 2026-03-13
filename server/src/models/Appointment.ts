@@ -1,0 +1,1 @@
+export type { AppointmentRecord as IAppointment } from '../types/entities';

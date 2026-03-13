@@ -1,0 +1,9 @@
+# www.robotstxt.org/
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /server/
+
+Sitemap: https://vaccination.pni.ma/sitemap.xml

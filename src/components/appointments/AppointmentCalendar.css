@@ -1,0 +1,109 @@
+.appointment-calendar {
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(22, 48, 43, 0.1);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 20px 50px rgba(22, 48, 43, 0.12);
+}
+
+.appointment-calendar h2 {
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+
+.appointment-calendar__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.appointment-calendar__toolbar .page-copy {
+  margin: 0;
+}
+
+.appointment-calendar__reset {
+  padding: 10px 14px;
+}
+
+.appointment-calendar .react-calendar {
+  width: 100%;
+  border: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  font-family: inherit;
+}
+
+.appointment-calendar .react-calendar__navigation button {
+  min-width: 44px;
+  background: transparent;
+}
+
+.appointment-calendar .react-calendar__tile--active {
+  background: #0f766e;
+}
+
+.appointment-calendar .react-calendar__tile--now {
+  background: rgba(217, 119, 6, 0.18);
+}
+
+.appointment-calendar__tile {
+  position: relative;
+}
+
+.appointment-calendar__tile--has-events {
+  background: rgba(15, 118, 110, 0.08);
+}
+
+.appointment-calendar__chips {
+  display: grid;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.appointment-calendar__chip {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 2px 6px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.65rem;
+  line-height: 1.25;
+}
+
+.appointment-calendar__chip--more {
+  background: rgba(22, 48, 43, 0.74) !important;
+}
+
+.appointment-calendar__legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  color: #5f6f68;
+}
+
+.appointment-calendar__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.appointment-calendar__legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+@media (max-width: 640px) {
+  .appointment-calendar__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+

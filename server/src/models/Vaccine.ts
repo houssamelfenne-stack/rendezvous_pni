@@ -1,0 +1,1 @@
+export type { VaccineRecord as IVaccine } from '../types/entities';

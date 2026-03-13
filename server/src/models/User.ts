@@ -1,0 +1,1 @@
+export type { UserRecord as IUser } from '../types/entities';
