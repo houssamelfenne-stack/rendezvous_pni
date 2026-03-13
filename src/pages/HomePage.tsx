@@ -93,7 +93,7 @@ const CALENDAR_ROWS: CalendarRow[] = [
         vaccineFr: 'Hépatite B (HB)',
         color: '#d1d5db',
         subRows: [
-            { labelAr: 'أُعطي عند الولادة', labelFr: 'Administré à la naissance', doses: { birth: { label: 'HB1n' } } },
+            { labelAr: 'أُعطي عند الولادة', labelFr: 'Administré à la naissance', doses: { birth: { label: 'HBn' } } },
             { labelAr: 'لم يُعطَ عند الولادة', labelFr: 'Non administré à la naissance', doses: { first4: { label: 'HB1' } } },
         ],
     },
@@ -101,19 +101,19 @@ const CALENDAR_ROWS: CalendarRow[] = [
         vaccineAr: 'السل (BCG)',
         vaccineFr: 'Tuberculose (BCG)',
         color: '#0ea5e9',
-        subRows: [{ labelAr: '', labelFr: '', doses: { birth: { label: 'BCG' } } }],
+        subRows: [{ labelAr: '', labelFr: '', doses: { first4: { label: 'BCG' } } }],
     },
     {
         vaccineAr: 'شلل الأطفال الفموي',
         vaccineFr: 'Poliomyélite (Oral)',
         color: '#fbbf24',
-        subRows: [{ labelAr: '', labelFr: '', doses: { birth: { label: 'VPO0' }, first4: { label: 'VPO1' }, w10: { label: 'VPO2' }, w12: { label: 'VPO3' }, y5: { label: 'VPO4' }, y11: { label: 'VPO5' } } }],
+        subRows: [{ labelAr: '', labelFr: '', doses: { first4: { label: 'VPO0' }, w8: { label: 'VPO1' }, w12: { label: 'VPO2' }, w16: { label: 'VPO3' }, m18: { label: 'VPO4' }, y5: { label: 'VPO5' } } }],
     },
     {
         vaccineAr: 'الخماسي DTC-Hib-HB',
         vaccineFr: 'DTC-Hib-HB (Vaccin Pentavalent)',
         color: '#111827',
-        subRows: [{ labelAr: '', labelFr: '', doses: { first4: { label: 'Penta1' }, w10: { label: 'Penta2' }, w12: { label: 'Penta3' } } }],
+        subRows: [{ labelAr: '', labelFr: '', doses: { w8: { label: 'Penta1' }, w12: { label: 'Penta2' }, w16: { label: 'Penta3' } } }],
     },
     {
         vaccineAr: 'المكورات الرئوية',
@@ -125,7 +125,7 @@ const CALENDAR_ROWS: CalendarRow[] = [
         vaccineAr: 'فيروس الروتا',
         vaccineFr: 'Rotavirus',
         color: '#22c55e',
-        subRows: [{ labelAr: '', labelFr: '', doses: { first4: { label: 'Rota1' }, w10: { label: 'Rota2' }, w12: { label: 'Rota3' } } }],
+        subRows: [{ labelAr: '', labelFr: '', doses: { w8: { label: 'Rota1' }, w12: { label: 'Rota2' }, w16: { label: 'Rota3' } } }],
     },
     {
         vaccineAr: 'شلل الأطفال المعطل',

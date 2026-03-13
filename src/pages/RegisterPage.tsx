@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import { registerUser } from '../services/authService';
 import { useAppPreferences } from '../context/AppPreferencesContext';
@@ -17,13 +18,91 @@ const RegisterPage: React.FC = () => {
     const [error, setError] = useState('');
     const history = useHistory();
 
+    const mapRegistrationMessage = (message?: string) => {
+        if (!message) {
+            return 'تعذر إنشاء الحساب. راجع البيانات ثم أعد المحاولة.';
+        }
+
+        if (message === 'User already exists') {
+            return 'يوجد حساب مسجل بهذا الرقم الوطني من قبل.';
+        }
+
+        if (message === 'Error registering user') {
+            return 'حدث خطأ أثناء إنشاء الحساب. أعد المحاولة بعد قليل.';
+        }
+
+        return message;
+    };
+
+    const mapValidationMessage = (message?: string) => {
+        if (!message) {
+            return null;
+        }
+
+        if (message === 'Full name is required') {
+            return 'الاسم الكامل مطلوب.';
+        }
+
+        if (message === 'Gender must be male, female, or other') {
+            return 'يرجى اختيار النوع بشكل صحيح.';
+        }
+
+        if (message === 'Date of birth must be a valid date') {
+            return 'تاريخ الازدياد غير صالح.';
+        }
+
+        if (message === 'National ID number is required') {
+            return 'رقم البطاقة الوطنية مطلوب.';
+        }
+
+        if (message === 'Address is required') {
+            return 'العنوان مطلوب.';
+        }
+
+        if (message === 'Phone number must be valid') {
+            return 'رقم الهاتف غير صالح.';
+        }
+
+        if (message === 'Password must be at least 6 characters long') {
+            return 'كلمة المرور يجب أن تتكون من 6 أحرف على الأقل.';
+        }
+
+        return message;
+    };
+
+    const getRegistrationErrorMessage = (err: unknown) => {
+        if (!axios.isAxiosError(err)) {
+            return 'تعذر إنشاء الحساب. حاول مرة أخرى.';
+        }
+
+        if (!err.response) {
+            return 'خدمة التسجيل غير متاحة حالياً. تأكد من تشغيل الخادم ثم أعد المحاولة.';
+        }
+
+        const responseData = err.response.data as {
+            message?: string;
+            errors?: Array<{ msg?: string }>;
+        };
+
+        if (responseData.errors?.length) {
+            return responseData.errors
+                .map((entry) => mapValidationMessage(entry.msg))
+                .filter(Boolean)
+                .join(' ');
+        }
+
+        return mapRegistrationMessage(responseData.message);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
+
         try {
             await registerUser({ fullName, gender: gender as 'male' | 'female' | 'other', dateOfBirth, nationalId, address, phoneNumber, password });
             history.push('/login');
         } catch (err) {
-            setError('تعذر إنشاء الحساب. راجع البيانات ثم أعد المحاولة.');
+            setError(getRegistrationErrorMessage(err));
         }
     };
 

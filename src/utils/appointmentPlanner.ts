@@ -1,6 +1,6 @@
 import { Appointment } from '../types/Appointment';
 import { Child } from '../types/Child';
-import { buildPniSchedule } from './pniSchedule';
+import { buildPniSchedule, normalizePniAntigen } from './pniSchedule';
 
 const getTodayIso = () => new Date().toISOString().slice(0, 10);
 
@@ -22,7 +22,7 @@ const toLookupKey = (appointment: Pick<Appointment, 'childId' | 'appointmentDate
     return [
         appointment.childId,
         appointment.appointmentDate,
-        appointment.vaccine || appointment.vaccineId || ''
+        normalizePniAntigen(appointment.vaccine || appointment.vaccineId || '')
     ].join('::');
 };
 

@@ -12,32 +12,42 @@ export interface PniDoseScheduleEntry extends PniDoseDefinition {
     scheduledDateIso: string;
 }
 
+export const PNI_ANTIGEN_ALIASES: Record<string, string> = {
+    HB1n: 'HBn',
+    Pneumo1: 'PCV1',
+    Pneumo2: 'PCV2',
+    Pneumo3: 'PCV3',
+    Pneumo4: 'PCV4'
+};
+
+export const normalizePniAntigen = (antigen: string) => PNI_ANTIGEN_ALIASES[antigen] || antigen;
+
 export const PNI_DOSE_DEFINITIONS: PniDoseDefinition[] = [
-    { antigen: 'HB1n', ageLabel: 'الولادة', offsetDays: 0, note: 'إذا أُعطيت جرعة التهاب الكبد B عند الولادة.' },
-    { antigen: 'HB1', ageLabel: 'الولادة', offsetDays: 0, note: 'تستعمل إذا لم تُعط جرعة الولادة.' },
-    { antigen: 'BCG', ageLabel: 'الولادة', offsetDays: 0 },
-    { antigen: 'VPO0', ageLabel: 'الولادة', offsetDays: 0 },
-    { antigen: 'VPO1', ageLabel: '4 أسابيع', offsetDays: 28 },
-    { antigen: 'Penta1', ageLabel: '4 أسابيع', offsetDays: 28 },
-    { antigen: 'Rota1', ageLabel: '4 أسابيع', offsetDays: 28 },
-    { antigen: 'Pneumo1', ageLabel: '8 أسابيع', offsetDays: 56, note: 'مطابق لـ PCV1 في الجدول المرجعي.' },
-    { antigen: 'VPO2', ageLabel: '10 أسابيع', offsetDays: 70 },
-    { antigen: 'Penta2', ageLabel: '10 أسابيع', offsetDays: 70 },
-    { antigen: 'Rota2', ageLabel: '10 أسابيع', offsetDays: 70 },
-    { antigen: 'VPO3', ageLabel: '12 أسابيع', offsetDays: 84 },
-    { antigen: 'Penta3', ageLabel: '12 أسابيع', offsetDays: 84 },
-    { antigen: 'Rota3', ageLabel: '12 أسابيع', offsetDays: 84 },
+    { antigen: 'HBn', ageLabel: 'الولادة', offsetDays: 0, note: 'إذا أُعطيت جرعة التهاب الكبد B عند الولادة.' },
+    { antigen: 'HB1', ageLabel: 'خلال أول 4 أسابيع', offsetDays: 28, note: 'تستعمل إذا لم تُعط جرعة التهاب الكبد B عند الولادة.' },
+    { antigen: 'BCG', ageLabel: 'خلال أول 4 أسابيع', offsetDays: 28, note: 'موعد مرجعي داخل أول 4 أسابيع بعد الولادة.' },
+    { antigen: 'VPO0', ageLabel: 'خلال أول 4 أسابيع', offsetDays: 28, note: 'موعد مرجعي داخل أول 4 أسابيع بعد الولادة.' },
+    { antigen: 'VPO1', ageLabel: '8 أسابيع', offsetDays: 56 },
+    { antigen: 'Penta1', ageLabel: '8 أسابيع', offsetDays: 56 },
+    { antigen: 'Rota1', ageLabel: '8 أسابيع', offsetDays: 56 },
+    { antigen: 'PCV1', ageLabel: '10 أسابيع', offsetDays: 70 },
+    { antigen: 'VPO2', ageLabel: '12 أسابيع', offsetDays: 84 },
+    { antigen: 'Penta2', ageLabel: '12 أسابيع', offsetDays: 84 },
+    { antigen: 'Rota2', ageLabel: '12 أسابيع', offsetDays: 84 },
     { antigen: 'VPI1', ageLabel: '12 أسابيع', offsetDays: 84 },
-    { antigen: 'Pneumo2', ageLabel: '16 أسبوعا', offsetDays: 112, note: 'مطابق لـ PCV2 في الجدول المرجعي.' },
-    { antigen: 'Pneumo3', ageLabel: '18 أسبوعا', offsetDays: 126, note: 'مطابق لـ PCV3 في الجدول المرجعي.' },
+    { antigen: 'VPO3', ageLabel: '16 أسبوعا', offsetDays: 112 },
+    { antigen: 'Penta3', ageLabel: '16 أسبوعا', offsetDays: 112 },
+    { antigen: 'Rota3', ageLabel: '16 أسبوعا', offsetDays: 112 },
+    { antigen: 'PCV2', ageLabel: '16 أسبوعا', offsetDays: 112 },
+    { antigen: 'PCV3', ageLabel: '18 أسبوعا', offsetDays: 126 },
     { antigen: 'VPI2', ageLabel: '9 أشهر', offsetDays: 273 },
     { antigen: 'RR1', ageLabel: '9 أشهر', offsetDays: 273 },
-    { antigen: 'Pneumo4', ageLabel: '12 شهرا', offsetDays: 365, note: 'مطابق لـ PCV4 في الجدول المرجعي.' },
-    { antigen: 'Rappel VPO1', ageLabel: '18 شهرا', offsetDays: 547, note: 'جرعة التذكير الموافقة لـ VPO4.' },
-    { antigen: 'Rappel DTC1', ageLabel: '18 شهرا', offsetDays: 547 },
+    { antigen: 'PCV4', ageLabel: '12 شهرا', offsetDays: 365 },
+    { antigen: 'VPO4', ageLabel: '18 شهرا', offsetDays: 547 },
+    { antigen: 'DTC1', ageLabel: '18 شهرا', offsetDays: 547 },
     { antigen: 'RR2', ageLabel: '18 شهرا', offsetDays: 547 },
-    { antigen: 'Rappel VPO2', ageLabel: '5 سنوات', offsetDays: 1825, note: 'جرعة التذكير الموافقة لـ VPO5.' },
-    { antigen: 'Rappel DTC2', ageLabel: '5 سنوات', offsetDays: 1825 },
+    { antigen: 'VPO5', ageLabel: '5 سنوات', offsetDays: 1825 },
+    { antigen: 'DTC2', ageLabel: '5 سنوات', offsetDays: 1825 },
     { antigen: 'HPV', ageLabel: '11 سنة', offsetDays: 4015 }
 ];
 

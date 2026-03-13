@@ -2,10 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAppPreferences } from '../../context/AppPreferencesContext';
 import { useAuth } from '../../context/AuthContext';
 import { useChildren } from '../../hooks/useChildren';
-import { buildPniSchedule, DEFAULT_PNI_BIRTH_DATE } from '../../utils/pniSchedule';
+import { buildPniSchedule, DEFAULT_PNI_BIRTH_DATE, normalizePniAntigen } from '../../utils/pniSchedule';
 import { getChildVaccineDoses, saveChildVaccineDose } from '../../services/vaccineService';
 
-const EXCLUSIVE_ANTIGEN_GROUPS = [['HB1n', 'HB1']];
+const EXCLUSIVE_ANTIGEN_GROUPS = [['HBn', 'HB1']];
 
 const getDoseKey = (antigen: string, offsetDays: number) => `${antigen}-${offsetDays}`;
 
@@ -71,7 +71,7 @@ const VaccineSchedule: React.FC = () => {
                     const serverRecords = await getChildVaccineDoses(selectedChildId);
                     const mappedRecords = serverRecords.reduce<Record<string, string>>((accumulator, record) => ({
                         ...accumulator,
-                        [getDoseKey(record.antigen, record.offsetDays)]: record.completedDate
+                        [getDoseKey(normalizePniAntigen(record.antigen), record.offsetDays)]: record.completedDate
                     }), {});
 
                     setCompletedDoseDates(normalizeExclusiveCompletedDates(mappedRecords, schedule));
@@ -94,7 +94,15 @@ const VaccineSchedule: React.FC = () => {
 
             try {
                 const parsedValue = JSON.parse(savedValue) as Record<string, string>;
-                setCompletedDoseDates(normalizeExclusiveCompletedDates(parsedValue, schedule));
+                const migratedValue = Object.entries(parsedValue).reduce<Record<string, string>>((accumulator, [doseKey, completedDate]) => {
+                    const [antigen, offsetDays] = doseKey.split('-');
+                    const normalizedDoseKey = `${normalizePniAntigen(antigen)}-${offsetDays}`;
+
+                    accumulator[normalizedDoseKey] = completedDate;
+                    return accumulator;
+                }, {});
+
+                setCompletedDoseDates(normalizeExclusiveCompletedDates(migratedValue, schedule));
             } catch {
                 setCompletedDoseDates({});
             }

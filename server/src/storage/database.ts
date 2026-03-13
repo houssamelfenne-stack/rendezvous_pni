@@ -6,10 +6,12 @@ import {
     vaccineDosesStore as excelVaccineDosesStore,
     vaccinesStore as excelVaccinesStore
 } from './excelDatabase';
+import { createPostgresDatabase } from './postgresDatabase';
 import { createId } from './shared';
 import { AppDatabase } from './types';
 
 let activeDatabase: AppDatabase | null = null;
+let activeDatabaseProvider: 'excel' | 'postgres' | null = null;
 
 const createExcelDatabase = (): AppDatabase => ({
     async initialize() {
@@ -57,9 +59,34 @@ const createExcelDatabase = (): AppDatabase => ({
     }
 });
 
+const resolveDatabaseProvider = (): 'excel' | 'postgres' => {
+    const configuredProvider = process.env.STORAGE_PROVIDER?.trim().toLowerCase();
+
+    if (configuredProvider === 'postgres') {
+        if (!process.env.DATABASE_URL) {
+            throw new Error('DATABASE_URL is required when STORAGE_PROVIDER=postgres');
+        }
+
+        return 'postgres';
+    }
+
+    if (configuredProvider === 'excel') {
+        return 'excel';
+    }
+
+    if (process.env.DATABASE_URL) {
+        return 'postgres';
+    }
+
+    return 'excel';
+};
+
 export const initializeDatabase = async () => {
     if (!activeDatabase) {
-        activeDatabase = createExcelDatabase();
+        activeDatabaseProvider = resolveDatabaseProvider();
+        activeDatabase = activeDatabaseProvider === 'postgres'
+            ? createPostgresDatabase()
+            : createExcelDatabase();
     }
 
     await activeDatabase.initialize();
@@ -72,6 +99,14 @@ export const getDatabase = () => {
     }
 
     return activeDatabase;
+};
+
+export const getDatabaseProvider = () => {
+    if (!activeDatabaseProvider) {
+        throw new Error('Database has not been initialized');
+    }
+
+    return activeDatabaseProvider;
 };
 
 export { createId };

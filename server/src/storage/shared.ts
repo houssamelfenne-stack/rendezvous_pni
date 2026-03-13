@@ -6,9 +6,9 @@ export const defaultVaccines: VaccineRecord[] = [
     {
         id: 'vaccine-bcg',
         name: 'BCG',
-        description: 'لقاح ضد السل يعطى عند الولادة.',
+        description: 'لقاح ضد السل يعطى خلال أول 4 أسابيع بعد الولادة.',
         ageGroup: 'حديثو الولادة',
-        schedule: ['عند الولادة'],
+        schedule: ['خلال أول 4 أسابيع بعد الولادة'],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
     },
@@ -17,7 +17,7 @@ export const defaultVaccines: VaccineRecord[] = [
         name: 'Pentavalent',
         description: 'لقاح مركب ضد عدة أمراض في الجرعات الأولى.',
         ageGroup: 'الرضع',
-        schedule: ['شهران', '4 أشهر', '6 أشهر'],
+        schedule: ['8 أسابيع', '12 أسبوعاً', '16 أسبوعاً'],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
     },
