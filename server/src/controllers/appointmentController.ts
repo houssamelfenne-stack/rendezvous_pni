@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { appointmentsStore, childrenStore, createId, vaccinesStore } from '../storage/excelDatabase';
+import { createId, getDatabase } from '../storage/database';
 import { AppointmentRecord, UserRecord } from '../types/entities';
 
 interface AuthenticatedRequest extends Request {
@@ -13,8 +13,9 @@ export const createAppointment = async (req: AuthenticatedRequest, res: Response
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        const children = childrenStore.list();
-        const vaccines = vaccinesStore.list();
+        const database = getDatabase();
+        const children = await database.childrenStore.list();
+        const vaccines = await database.vaccinesStore.list();
         const child = children.find((entry) => entry.id === req.body.childId && entry.userId === req.user?.id);
         const vaccine = vaccines.find((entry) => entry.id === req.body.vaccineId);
 
@@ -26,7 +27,8 @@ export const createAppointment = async (req: AuthenticatedRequest, res: Response
             return res.status(400).json({ message: 'Invalid vaccineId' });
         }
 
-        const appointments = appointmentsStore.list();
+        const appointmentsStore = database.appointmentsStore;
+        const appointments = await appointmentsStore.list();
         const timestamp = new Date().toISOString();
         const appointment: AppointmentRecord = {
             id: createId('appointment'),
@@ -41,7 +43,7 @@ export const createAppointment = async (req: AuthenticatedRequest, res: Response
         };
 
         appointments.push(appointment);
-        appointmentsStore.save(appointments);
+    await appointmentsStore.save(appointments);
         res.status(201).json(appointment);
     } catch (error: any) {
         res.status(400).json({ message: error.message });
@@ -55,7 +57,7 @@ export const getAppointments = async (req: AuthenticatedRequest, res: Response) 
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        const appointments = appointmentsStore.list().filter((entry) => entry.userId === req.user?.id);
+        const appointments = (await getDatabase().appointmentsStore.list()).filter((entry) => entry.userId === req.user?.id);
         res.status(200).json(appointments);
     } catch (error: any) {
         res.status(500).json({ message: error.message });
@@ -69,7 +71,7 @@ export const getAppointmentById = async (req: AuthenticatedRequest, res: Respons
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        const appointment = appointmentsStore.list().find((entry) => entry.id === req.params.id && entry.userId === req.user?.id);
+        const appointment = (await getDatabase().appointmentsStore.list()).find((entry) => entry.id === req.params.id && entry.userId === req.user?.id);
         if (!appointment) {
             return res.status(404).json({ message: 'Appointment not found' });
         }
@@ -86,7 +88,8 @@ export const updateAppointment = async (req: AuthenticatedRequest, res: Response
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        const appointments = appointmentsStore.list();
+        const appointmentsStore = getDatabase().appointmentsStore;
+        const appointments = await appointmentsStore.list();
         const appointmentIndex = appointments.findIndex((entry) => entry.id === req.params.id && entry.userId === req.user?.id);
 
         if (appointmentIndex === -1) {
@@ -101,7 +104,7 @@ export const updateAppointment = async (req: AuthenticatedRequest, res: Response
         };
 
         appointments[appointmentIndex] = appointment;
-        appointmentsStore.save(appointments);
+        await appointmentsStore.save(appointments);
         if (!appointment) {
             return res.status(404).json({ message: 'Appointment not found' });
         }
@@ -118,13 +121,14 @@ export const deleteAppointment = async (req: AuthenticatedRequest, res: Response
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        const appointments = appointmentsStore.list();
+        const appointmentsStore = getDatabase().appointmentsStore;
+        const appointments = await appointmentsStore.list();
         const appointment = appointments.find((entry) => entry.id === req.params.id && entry.userId === req.user?.id);
         if (!appointment) {
             return res.status(404).json({ message: 'Appointment not found' });
         }
 
-        appointmentsStore.save(appointments.filter((entry) => !(entry.id === req.params.id && entry.userId === req.user?.id)));
+        await appointmentsStore.save(appointments.filter((entry) => !(entry.id === req.params.id && entry.userId === req.user?.id)));
         res.status(204).send();
     } catch (error: any) {
         res.status(500).json({ message: error.message });

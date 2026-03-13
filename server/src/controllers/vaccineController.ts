@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { createId, vaccinesStore } from '../storage/excelDatabase';
+import { createId, getDatabase } from '../storage/database';
 import { VaccineRecord } from '../types/entities';
 
 // Get all vaccines
 export const getVaccines = async (req: Request, res: Response) => {
     try {
-        const vaccines = vaccinesStore.list();
+        const vaccines = await getDatabase().vaccinesStore.list();
         res.status(200).json(vaccines);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching vaccines', error });
@@ -17,7 +17,8 @@ export const addVaccine = async (req: Request, res: Response) => {
     const { name, description, ageGroup, schedule } = req.body;
 
     try {
-        const vaccines = vaccinesStore.list();
+        const vaccinesStore = getDatabase().vaccinesStore;
+        const vaccines = await vaccinesStore.list();
         const timestamp = new Date().toISOString();
         const newVaccine: VaccineRecord = {
             id: createId('vaccine'),
@@ -30,7 +31,7 @@ export const addVaccine = async (req: Request, res: Response) => {
         };
 
         vaccines.push(newVaccine);
-        vaccinesStore.save(vaccines);
+        await vaccinesStore.save(vaccines);
         res.status(201).json(newVaccine);
     } catch (error) {
         res.status(500).json({ message: 'Error adding vaccine', error });
@@ -43,7 +44,8 @@ export const updateVaccine = async (req: Request, res: Response) => {
     const { name, description, ageGroup, schedule } = req.body;
 
     try {
-        const vaccines = vaccinesStore.list();
+        const vaccinesStore = getDatabase().vaccinesStore;
+        const vaccines = await vaccinesStore.list();
         const vaccineIndex = vaccines.findIndex((entry) => entry.id === id);
 
         if (vaccineIndex === -1) {
@@ -60,7 +62,7 @@ export const updateVaccine = async (req: Request, res: Response) => {
         };
 
         vaccines[vaccineIndex] = updatedVaccine;
-        vaccinesStore.save(vaccines);
+        await vaccinesStore.save(vaccines);
         res.status(200).json(updatedVaccine);
     } catch (error) {
         res.status(500).json({ message: 'Error updating vaccine', error });
@@ -72,8 +74,9 @@ export const deleteVaccine = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     try {
-        const vaccines = vaccinesStore.list();
-        vaccinesStore.save(vaccines.filter((entry) => entry.id !== id));
+        const vaccinesStore = getDatabase().vaccinesStore;
+        const vaccines = await vaccinesStore.list();
+        await vaccinesStore.save(vaccines.filter((entry) => entry.id !== id));
         res.status(204).send();
     } catch (error) {
         res.status(500).json({ message: 'Error deleting vaccine', error });

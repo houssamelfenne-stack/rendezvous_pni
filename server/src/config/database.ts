@@ -1,7 +1,7 @@
-import { initializeExcelDatabase } from '../storage/excelDatabase';
+import { initializeDatabase } from '../storage/database';
 
 const connectDB = async () => {
-    initializeExcelDatabase();
+    await initializeDatabase();
     console.log('Excel database initialized successfully');
 };
 

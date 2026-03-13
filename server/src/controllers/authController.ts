@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { createId, usersStore } from '../storage/excelDatabase';
+import { createId, getDatabase } from '../storage/database';
 import { UserRecord } from '../types/entities';
 
 interface AuthenticatedRequest extends Request {
@@ -12,7 +12,8 @@ const register = async (req: Request, res: Response) => {
     const { fullName, gender, dateOfBirth, nationalId, address, phoneNumber, password } = req.body;
 
     try {
-        const users = usersStore.list();
+        const usersStore = getDatabase().usersStore;
+        const users = await usersStore.list();
         const existingUser = users.find((user) => user.nationalId === nationalId);
 
         if (existingUser) {
@@ -35,7 +36,7 @@ const register = async (req: Request, res: Response) => {
         };
 
         users.push(newUser);
-        usersStore.save(users);
+        await usersStore.save(users);
         res.status(201).json({ message: 'User registered successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Error registering user', error });
@@ -46,7 +47,7 @@ const login = async (req: Request, res: Response) => {
     const { nationalId, password } = req.body;
 
     try {
-        const users = usersStore.list();
+        const users = await getDatabase().usersStore.list();
         const user = users.find((entry) => entry.nationalId === nationalId);
 
         if (!user) {

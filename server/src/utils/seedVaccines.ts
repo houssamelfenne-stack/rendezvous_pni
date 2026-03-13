@@ -1,4 +1,4 @@
-import { createId, vaccinesStore } from '../storage/excelDatabase';
+import { createId, getDatabase } from '../storage/database';
 import { VaccineRecord } from '../types/entities';
 
 const seedVaccines = async () => {
@@ -70,7 +70,7 @@ const seedVaccines = async () => {
     ];
 
     try {
-        vaccinesStore.save(vaccines);
+        await getDatabase().vaccinesStore.save(vaccines);
         console.log('Vaccines seeded successfully!');
     } catch (error) {
         console.error('Error seeding vaccines:', error);

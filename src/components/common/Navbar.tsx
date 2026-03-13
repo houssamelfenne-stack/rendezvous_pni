@@ -60,6 +60,9 @@ const Navbar: React.FC = () => {
                     <NavLink exact to="/" className="nav-link" activeClassName="nav-link--cta">
                         {t('nav.home')}
                     </NavLink>
+                    <NavLink to="/vaccines" className="nav-link" activeClassName="nav-link--cta">
+                        {t('nav.vaccines')}
+                    </NavLink>
                     <button type="button" className="nav-link navbar__utility-button" onClick={toggleLanguage}>
                         {t('nav.languageToggle')}
                     </button>
@@ -78,9 +81,6 @@ const Navbar: React.FC = () => {
                             </NavLink>
                             <NavLink to="/appointments" className="nav-link" activeClassName="nav-link--cta">
                                 {t('nav.appointments')}
-                            </NavLink>
-                            <NavLink to="/vaccines" className="nav-link" activeClassName="nav-link--cta">
-                                {t('nav.vaccines')}
                             </NavLink>
                             <NavLink to="/profile" className="nav-link" activeClassName="nav-link--cta">
                                 {t('nav.profile')}

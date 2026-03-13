@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { childrenStore, createId } from '../storage/excelDatabase';
+import { createId, getDatabase } from '../storage/database';
 import { ChildRecord, UserRecord } from '../types/entities';
 
 interface AuthenticatedRequest extends Request {
@@ -13,7 +13,8 @@ export const addChild = async (req: AuthenticatedRequest, res: Response) => {
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        const children = childrenStore.list();
+        const childrenStore = getDatabase().childrenStore;
+        const children = await childrenStore.list();
         const timestamp = new Date().toISOString();
         const child: ChildRecord = {
             id: createId('child'),
@@ -29,7 +30,7 @@ export const addChild = async (req: AuthenticatedRequest, res: Response) => {
         };
 
         children.push(child);
-        childrenStore.save(children);
+        await childrenStore.save(children);
         res.status(201).json(child);
     } catch (error: any) {
         res.status(400).json({ message: error.message });
@@ -43,7 +44,7 @@ export const getChildren = async (req: AuthenticatedRequest, res: Response) => {
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        const children = childrenStore.list().filter((child) => child.userId === req.user?.id);
+        const children = (await getDatabase().childrenStore.list()).filter((child) => child.userId === req.user?.id);
         res.status(200).json(children);
     } catch (error: any) {
         res.status(500).json({ message: error.message });
@@ -57,7 +58,7 @@ export const getChildById = async (req: AuthenticatedRequest, res: Response) => 
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        const child = childrenStore.list().find((entry) => entry.id === req.params.id && entry.userId === req.user?.id);
+        const child = (await getDatabase().childrenStore.list()).find((entry) => entry.id === req.params.id && entry.userId === req.user?.id);
         if (!child) {
             return res.status(404).json({ message: 'Child not found' });
         }
@@ -74,7 +75,8 @@ export const updateChild = async (req: AuthenticatedRequest, res: Response) => {
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        const children = childrenStore.list();
+        const childrenStore = getDatabase().childrenStore;
+        const children = await childrenStore.list();
         const childIndex = children.findIndex((entry) => entry.id === req.params.id && entry.userId === req.user?.id);
 
         if (childIndex === -1) {
@@ -89,7 +91,7 @@ export const updateChild = async (req: AuthenticatedRequest, res: Response) => {
         };
 
         children[childIndex] = child;
-        childrenStore.save(children);
+        await childrenStore.save(children);
         if (!child) {
             return res.status(404).json({ message: 'Child not found' });
         }
@@ -106,13 +108,14 @@ export const deleteChild = async (req: AuthenticatedRequest, res: Response) => {
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        const children = childrenStore.list();
+        const childrenStore = getDatabase().childrenStore;
+        const children = await childrenStore.list();
         const child = children.find((entry) => entry.id === req.params.id && entry.userId === req.user?.id);
         if (!child) {
             return res.status(404).json({ message: 'Child not found' });
         }
 
-        childrenStore.save(children.filter((entry) => !(entry.id === req.params.id && entry.userId === req.user?.id)));
+        await childrenStore.save(children.filter((entry) => !(entry.id === req.params.id && entry.userId === req.user?.id)));
         res.status(204).send();
     } catch (error: any) {
         res.status(500).json({ message: error.message });

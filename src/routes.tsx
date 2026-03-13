@@ -20,8 +20,8 @@ const Routes = () => {
             <ProtectedRoute path="/dashboard" component={DashboardPage} />
             <ProtectedRoute path="/children" component={ChildrenPage} />
             <ProtectedRoute path="/appointments" component={AppointmentsPage} />
-            <ProtectedRoute path="/vaccines" component={VaccineSchedulePage} />
-            <ProtectedRoute path="/vaccine-schedule" component={VaccineSchedulePage} />
+            <Route path="/vaccines" component={VaccineSchedulePage} />
+            <Route path="/vaccine-schedule" component={VaccineSchedulePage} />
         </Switch>
     );
 };

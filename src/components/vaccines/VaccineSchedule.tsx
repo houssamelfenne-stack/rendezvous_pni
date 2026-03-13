@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAppPreferences } from '../../context/AppPreferencesContext';
+import { useAuth } from '../../context/AuthContext';
 import { useChildren } from '../../hooks/useChildren';
 import { buildPniSchedule, DEFAULT_PNI_BIRTH_DATE } from '../../utils/pniSchedule';
 import { getChildVaccineDoses, saveChildVaccineDose } from '../../services/vaccineService';
@@ -46,7 +47,8 @@ const formatInputDate = (value: string) => {
 
 const VaccineSchedule: React.FC = () => {
     const { isRtl, t } = useAppPreferences();
-    const { children, loading, error } = useChildren();
+    const { isAuthenticated } = useAuth();
+    const { children, loading, error } = useChildren(isAuthenticated);
     const [selectedChildId, setSelectedChildId] = useState('manual');
     const [birthDate, setBirthDate] = useState(DEFAULT_PNI_BIRTH_DATE);
     const [completedDoseDates, setCompletedDoseDates] = useState<Record<string, string>>({});

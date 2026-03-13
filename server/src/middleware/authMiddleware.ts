@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { usersStore } from '../storage/excelDatabase';
+import { getDatabase } from '../storage/database';
 import { UserRecord } from '../types/entities';
 
 interface AuthenticatedRequest extends Request {
@@ -16,7 +16,7 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as { id: string };
-        const user = usersStore.list().find((entry) => entry.id === decoded.id);
+        const user = (await getDatabase().usersStore.list()).find((entry) => entry.id === decoded.id);
 
         if (!user) {
             return res.status(401).json({ message: 'Invalid token.' });

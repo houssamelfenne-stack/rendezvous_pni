@@ -2,14 +2,22 @@ import { useState, useEffect } from 'react';
 import { Child } from '../types/Child';
 import { getChildren, addChild, updateChild, deleteChild } from '../services/childService';
 
-const useChildren = () => {
+const useChildren = (enabled: boolean = true) => {
     const [children, setChildren] = useState<Child[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(enabled);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        if (!enabled) {
+            setChildren([]);
+            setError(null);
+            setLoading(false);
+            return;
+        }
+
         const fetchChildren = async () => {
             try {
+                setLoading(true);
                 const fetchedChildren = await getChildren();
                 setChildren(fetchedChildren);
             } catch (err) {
@@ -20,7 +28,7 @@ const useChildren = () => {
         };
 
         fetchChildren();
-    }, []);
+    }, [enabled]);
 
     const addNewChild = async (childData: Child) => {
         try {

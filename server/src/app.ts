@@ -7,7 +7,7 @@ import appointmentRoutes from './routes/appointmentRoutes';
 import vaccineRoutes from './routes/vaccineRoutes';
 import vaccineDoseRoutes from './routes/vaccineDoseRoutes';
 import { config } from 'dotenv';
-import { initializeExcelDatabase } from './storage/excelDatabase';
+import connectDB from './config/database';
 
 config();
 
@@ -18,10 +18,6 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(bodyParser.json());
 
-// Excel database initialization
-initializeExcelDatabase();
-console.log('Excel database ready');
-
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/children', childRoutes);
@@ -30,6 +26,13 @@ app.use('/api/vaccines', vaccineRoutes);
 app.use('/api/vaccine-doses', vaccineDoseRoutes);
 
 // Start server
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+connectDB()
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    })
+    .catch((error) => {
+        console.error('Failed to initialize database', error);
+        process.exit(1);
+    });
