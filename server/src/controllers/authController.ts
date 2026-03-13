@@ -25,6 +25,8 @@ const register = async (req: Request, res: Response) => {
         const newUser: UserRecord = {
             id: createId('user'),
             fullName,
+            role: 'user',
+            isActive: true,
             gender,
             dateOfBirth,
             nationalId,
@@ -54,12 +56,16 @@ const login = async (req: Request, res: Response) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
+        if (!user.isActive) {
+            return res.status(403).json({ message: 'Account disabled' });
+        }
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
+        const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
         const { password: _password, ...publicUser } = user;
         res.status(200).json({ token, ...publicUser });
     } catch (error) {

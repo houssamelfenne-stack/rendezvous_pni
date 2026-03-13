@@ -46,6 +46,21 @@ const defaultVaccines: VaccineRecord[] = [
     }
 ];
 
+const normalizeUser = (record: Partial<UserRecord>): UserRecord => ({
+    id: String(record.id || createId('user')),
+    fullName: String(record.fullName || ''),
+    role: record.role === 'super-admin' ? 'super-admin' : 'user',
+    isActive: record.isActive === false ? false : true,
+    gender: (record.gender === 'male' || record.gender === 'female' || record.gender === 'other' ? record.gender : 'other'),
+    dateOfBirth: String(record.dateOfBirth || ''),
+    nationalId: String(record.nationalId || ''),
+    address: String(record.address || ''),
+    phoneNumber: String(record.phoneNumber || ''),
+    password: String(record.password || ''),
+    createdAt: String(record.createdAt || new Date().toISOString()),
+    updatedAt: String(record.updatedAt || new Date().toISOString())
+});
+
 const normalizeVaccine = (record: Partial<VaccineRecord>): VaccineRecord => ({
     id: String(record.id || createId('vaccine')),
     name: String(record.name || ''),
@@ -102,6 +117,10 @@ const serialize = (sheet: SheetName, row: any) => {
 };
 
 const deserialize = <T>(sheet: SheetName, row: any): T => {
+    if (sheet === 'users') {
+        return normalizeUser(row) as unknown as T;
+    }
+
     if (sheet === 'vaccines') {
         return normalizeVaccine(row) as unknown as T;
     }

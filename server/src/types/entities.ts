@@ -1,6 +1,10 @@
+export type UserRole = 'user' | 'super-admin';
+
 export interface UserRecord {
     id: string;
     fullName: string;
+    role: UserRole;
+    isActive: boolean;
     gender: 'male' | 'female' | 'other';
     dateOfBirth: string;
     nationalId: string;

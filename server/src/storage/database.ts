@@ -9,6 +9,7 @@ import {
 import { createPostgresDatabase } from './postgresDatabase';
 import { createId } from './shared';
 import { AppDatabase } from './types';
+import { ensureSuperAdminAccount } from '../utils/bootstrapSuperAdmin';
 
 let activeDatabase: AppDatabase | null = null;
 let activeDatabaseProvider: 'excel' | 'postgres' | null = null;
@@ -90,6 +91,7 @@ export const initializeDatabase = async () => {
     }
 
     await activeDatabase.initialize();
+    await ensureSuperAdminAccount(activeDatabase);
     return activeDatabase;
 };
 

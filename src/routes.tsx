@@ -8,6 +8,7 @@ import DashboardPage from './pages/DashboardPage';
 import ChildrenPage from './pages/ChildrenPage';
 import AppointmentsPage from './pages/AppointmentsPage';
 import VaccineSchedulePage from './pages/VaccineSchedulePage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
 const Routes = () => {
@@ -18,6 +19,7 @@ const Routes = () => {
             <Route path="/register" component={RegisterPage} />
             <ProtectedRoute path="/profile" component={ProfilePage} />
             <ProtectedRoute path="/dashboard" component={DashboardPage} />
+            <ProtectedRoute path="/admin" component={AdminDashboardPage} requiredRole="super-admin" />
             <ProtectedRoute path="/children" component={ChildrenPage} />
             <ProtectedRoute path="/appointments" component={AppointmentsPage} />
             <Route path="/vaccines" component={VaccineSchedulePage} />

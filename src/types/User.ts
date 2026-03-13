@@ -1,5 +1,9 @@
+export type UserRole = 'user' | 'super-admin';
+
 export interface User {
     fullName: string;
+    role?: UserRole;
+    isActive?: boolean;
     gender: 'male' | 'female' | 'other';
     dateOfBirth: string;
     nationalId: string;

@@ -65,6 +65,8 @@ const usersMapper: RowMapper<UserRecord> = {
     fromRow: (row) => ({
         id: row.id,
         fullName: row.full_name,
+        role: row.role === 'super-admin' ? 'super-admin' : 'user',
+        isActive: row.is_active !== false,
         gender: row.gender,
         dateOfBirth: row.date_of_birth,
         nationalId: row.national_id,
@@ -77,6 +79,8 @@ const usersMapper: RowMapper<UserRecord> = {
     toRow: (row) => ({
         id: row.id,
         full_name: row.fullName,
+        role: row.role,
+        is_active: row.isActive,
         gender: row.gender,
         date_of_birth: row.dateOfBirth,
         national_id: row.nationalId,
@@ -202,6 +206,8 @@ export const createPostgresDatabase = (): AppDatabase => {
                 CREATE TABLE IF NOT EXISTS users (
                     id TEXT PRIMARY KEY,
                     full_name TEXT NOT NULL,
+                    role TEXT NOT NULL DEFAULT 'user',
+                    is_active BOOLEAN NOT NULL DEFAULT true,
                     gender TEXT NOT NULL,
                     date_of_birth TEXT NOT NULL,
                     national_id TEXT NOT NULL UNIQUE,
@@ -212,6 +218,9 @@ export const createPostgresDatabase = (): AppDatabase => {
                     updated_at TEXT NOT NULL
                 )
             `);
+
+            await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user'`);
+            await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true`);
 
             await pool.query(`
                 CREATE TABLE IF NOT EXISTS children (

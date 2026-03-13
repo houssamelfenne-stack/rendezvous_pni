@@ -7,7 +7,7 @@ import platformLogo from '../../assets/logo-main.png';
 
 
 const Navbar: React.FC = () => {
-    const { isAuthenticated, logout, user } = useAuth();
+    const { isAuthenticated, isSuperAdmin, logout, user } = useAuth();
     const { language, theme, toggleLanguage, toggleTheme, t } = useAppPreferences();
     const history = useHistory();
     const { appointments } = useAppointments(isAuthenticated);
@@ -85,6 +85,11 @@ const Navbar: React.FC = () => {
                             <NavLink to="/profile" className="nav-link" activeClassName="nav-link--cta">
                                 {t('nav.profile')}
                             </NavLink>
+                            {isSuperAdmin ? (
+                                <NavLink to="/admin" className="nav-link" activeClassName="nav-link--cta">
+                                    {t('nav.admin')}
+                                </NavLink>
+                            ) : null}
                             <div className="navbar__notifications">
                                 <button
                                     type="button"

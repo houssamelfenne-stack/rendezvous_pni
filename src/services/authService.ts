@@ -25,6 +25,8 @@ export const login = async (nationalId: string, password: string) => {
         password,
         token: response.data.token,
         fullName: response.data.fullName || '',
+        role: response.data.role === 'super-admin' ? 'super-admin' : 'user',
+        isActive: response.data.isActive !== false,
         gender: (response.data.gender || 'other') as User['gender'],
         dateOfBirth: response.data.dateOfBirth || '',
         address: response.data.address || '',
@@ -41,7 +43,24 @@ export const logout = () => {
 
 export const getCurrentUser = (): User | null => {
     const rawUser = localStorage.getItem('user');
-    return rawUser ? JSON.parse(rawUser) as User : null;
+
+    if (!rawUser) {
+        return null;
+    }
+
+    const parsedUser = JSON.parse(rawUser) as Partial<User>;
+    return {
+        fullName: parsedUser.fullName || '',
+        role: parsedUser.role === 'super-admin' ? 'super-admin' : 'user',
+        isActive: parsedUser.isActive !== false,
+        gender: (parsedUser.gender || 'other') as User['gender'],
+        dateOfBirth: parsedUser.dateOfBirth || '',
+        nationalId: parsedUser.nationalId || '',
+        address: parsedUser.address || '',
+        phoneNumber: parsedUser.phoneNumber || '',
+        password: parsedUser.password,
+        token: parsedUser.token
+    };
 };
 
 export const authService = {

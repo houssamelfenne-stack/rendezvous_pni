@@ -5,6 +5,7 @@ import { RegisterUserData, User } from '../types/User';
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  isSuperAdmin: boolean;
   login: (nationalId: string, password: string) => Promise<void>;
   logout: () => void;
   register: (userData: RegisterUserData) => Promise<void>;
@@ -54,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: Boolean(user), login, logout, register, updateUser }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: Boolean(user), isSuperAdmin: user?.role === 'super-admin', login, logout, register, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
