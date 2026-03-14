@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useAppPreferences } from '../../context/AppPreferencesContext';
 import { createAppointment } from '../../services/appointmentService';
 import FormInput from '../common/FormInput';
 
 const AppointmentForm: React.FC = () => {
+    const { t } = useAppPreferences();
     const [date, setDate] = useState('');
     const [time, setTime] = useState('');
     const [childId, setChildId] = useState('');
@@ -26,36 +28,36 @@ const AppointmentForm: React.FC = () => {
             });
             history.push('/appointments');
         } catch (err) {
-            setError('Failed to create appointment. Please try again.');
+            setError(t('appointmentForm.errorCreate'));
         }
     };
 
     return (
         <form onSubmit={handleSubmit}>
-            <h2>Schedule Appointment</h2>
+            <h2>{t('appointmentForm.title')}</h2>
             {error && <p className="error">{error}</p>}
             <FormInput
-                label="Date"
+                label={t('appointmentForm.date')}
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 required
             />
             <FormInput
-                label="Time"
+                label={t('appointmentForm.time')}
                 type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
                 required
             />
             <FormInput
-                label="Child ID"
+                label={t('appointmentForm.childId')}
                 type="text"
                 value={childId}
                 onChange={(e) => setChildId(e.target.value)}
                 required
             />
-            <button type="submit">Schedule Appointment</button>
+            <button type="submit">{t('appointmentForm.submit')}</button>
         </form>
     );
 };

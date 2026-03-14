@@ -7,6 +7,7 @@ import appointmentRoutes from './routes/appointmentRoutes';
 import vaccineRoutes from './routes/vaccineRoutes';
 import vaccineDoseRoutes from './routes/vaccineDoseRoutes';
 import adminRoutes from './routes/adminRoutes';
+import healthCenterRoutes from './routes/healthCenterRoutes';
 import { config } from 'dotenv';
 import connectDB from './config/database';
 
@@ -26,6 +27,7 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/vaccines', vaccineRoutes);
 app.use('/api/vaccine-doses', vaccineDoseRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/health-center', healthCenterRoutes);
 
 // Start server
 connectDB()

@@ -1,4 +1,4 @@
-import { AppointmentRecord, ChildRecord, UserRecord, VaccineDoseRecord, VaccineRecord } from '../types/entities';
+import { AppointmentRecord, AuditLogRecord, ChildRecord, UserRecord, VaccineDoseRecord, VaccineRecord } from '../types/entities';
 
 export interface EntityStore<T> {
     list(): Promise<T[]>;
@@ -12,4 +12,5 @@ export interface AppDatabase {
     appointmentsStore: EntityStore<AppointmentRecord>;
     vaccinesStore: EntityStore<VaccineRecord>;
     vaccineDosesStore: EntityStore<VaccineDoseRecord>;
+    auditLogsStore: EntityStore<AuditLogRecord>;
 }

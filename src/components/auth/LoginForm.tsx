@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useAppPreferences } from '../../context/AppPreferencesContext';
 import FormInput from '../common/FormInput';
 
 const LoginForm: React.FC = () => {
     const { login, isAuthenticated } = useAuth();
+    const { t } = useAppPreferences();
     const [nationalId, setNationalId] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -19,15 +21,15 @@ const LoginForm: React.FC = () => {
 
     const getLoginErrorMessage = (err: unknown) => {
         if (!axios.isAxiosError(err)) {
-            return 'تعذر تسجيل الدخول. حاول مرة أخرى.';
+            return t('auth.loginErrorGeneric');
         }
 
         if (!err.response) {
-            return 'خدمة تسجيل الدخول غير متاحة حالياً. تأكد من تشغيل الخادم ثم أعد المحاولة.';
+            return t('auth.loginServiceUnavailable');
         }
 
         const responseData = err.response.data as { message?: string };
-        return responseData.message || 'تعذر تسجيل الدخول. تحقق من رقم البطاقة الوطنية وكلمة المرور.';
+        return responseData.message || t('auth.loginInvalidCredentials');
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -44,24 +46,24 @@ const LoginForm: React.FC = () => {
 
     return (
         <form onSubmit={handleSubmit}>
-            <h2>تسجيل الدخول</h2>
+            <h2>{t('auth.loginTitle')}</h2>
             {error && <p className="error">{error}</p>}
             <FormInput
-                label="رقم البطاقة الوطنية"
+                label={t('auth.nationalId')}
                 value={nationalId}
                 onChange={(e) => setNationalId(e.target.value)}
-                placeholder="مثال: AB123456"
+                placeholder={t('auth.nationalIdPlaceholder')}
                 required
             />
             <FormInput
-                label="كلمة المرور"
+                label={t('auth.password')}
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="أدخل كلمة المرور"
+                placeholder={t('auth.passwordPlaceholder')}
                 required
             />
-            <button type="submit">دخول</button>
+            <button type="submit">{t('auth.loginButton')}</button>
         </form>
     );
 };

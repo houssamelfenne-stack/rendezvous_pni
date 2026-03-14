@@ -21,7 +21,7 @@ const useChildren = (enabled: boolean = true) => {
                 const fetchedChildren = await getChildren();
                 setChildren(fetchedChildren);
             } catch (err) {
-                setError('Failed to fetch children data');
+                setError('children.fetchErrorShort');
             } finally {
                 setLoading(false);
             }
@@ -35,7 +35,7 @@ const useChildren = (enabled: boolean = true) => {
             const newChild = await addChild(childData);
             setChildren((prev) => [...prev, newChild]);
         } catch (err) {
-            setError('Failed to add child');
+            setError('children.addErrorShort');
         }
     };
 
@@ -44,7 +44,7 @@ const useChildren = (enabled: boolean = true) => {
             const updatedChild = await updateChild(childId, updatedData);
             setChildren((prev) => prev.map(child => (child.id === childId ? updatedChild : child)));
         } catch (err) {
-            setError('Failed to update child');
+            setError('children.updateErrorShort');
         }
     };
 
@@ -53,7 +53,7 @@ const useChildren = (enabled: boolean = true) => {
             await deleteChild(childId);
             setChildren((prev) => prev.filter(child => child.id !== childId));
         } catch (err) {
-            setError('Failed to delete child');
+            setError('children.deleteErrorShort');
         }
     };
 

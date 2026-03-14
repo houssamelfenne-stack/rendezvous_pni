@@ -3,10 +3,22 @@ import { AppDatabase } from '../storage/types';
 import { UserRecord } from '../types/entities';
 import { createId } from '../storage/shared';
 
+const normalizeRole = (role?: string): UserRecord['role'] => {
+    if (role === 'admin' || role === 'super-admin') {
+        return 'admin';
+    }
+
+    if (role === 'health-center') {
+        return 'health-center';
+    }
+
+    return 'citizen';
+};
+
 const normalizeExistingUsers = (users: UserRecord[]) => {
     let changed = false;
     const normalizedUsers = users.map((user) => {
-        const nextRole = user.role || 'user';
+        const nextRole = normalizeRole((user as UserRecord & { role?: string }).role);
         const nextIsActive = user.isActive === false ? false : true;
 
         if (user.role === nextRole && user.isActive === nextIsActive) {
@@ -45,7 +57,7 @@ export const ensureSuperAdminAccount = async (database: AppDatabase) => {
         return;
     }
 
-    const existingSuperAdmin = normalizedUsers.find((user) => user.role === 'super-admin' || user.nationalId === superAdminNationalId);
+    const existingSuperAdmin = normalizedUsers.find((user) => user.role === 'admin' || user.nationalId === superAdminNationalId);
 
     if (existingSuperAdmin) {
         const hashedPassword = await bcrypt.hash(superAdminPassword, 10);
@@ -53,7 +65,7 @@ export const ensureSuperAdminAccount = async (database: AppDatabase) => {
             ? {
                 ...user,
                 fullName: superAdminFullName,
-                role: 'super-admin' as const,
+                role: 'admin' as const,
                 isActive: true,
                 gender: superAdminGender === 'male' || superAdminGender === 'female' || superAdminGender === 'other' ? superAdminGender : 'other',
                 dateOfBirth: superAdminDateOfBirth,
@@ -73,7 +85,7 @@ export const ensureSuperAdminAccount = async (database: AppDatabase) => {
     const superAdminUser: UserRecord = {
         id: createId('user'),
         fullName: superAdminFullName,
-        role: 'super-admin',
+        role: 'admin',
         isActive: true,
         gender: superAdminGender === 'male' || superAdminGender === 'female' || superAdminGender === 'other' ? superAdminGender : 'other',
         dateOfBirth: superAdminDateOfBirth,

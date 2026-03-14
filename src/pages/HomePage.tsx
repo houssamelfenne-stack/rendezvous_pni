@@ -20,6 +20,12 @@ const FEATURES = [
     { icon: '📅', keyTitle: 'home.cardScheduleTitle', keyText: 'home.cardScheduleText' },
 ];
 
+const ACCOUNT_TYPES = [
+    { key: 'citizen', badgeKey: 'home.account.citizen.badge', titleKey: 'home.account.citizen.title', textKey: 'home.account.citizen.text' },
+    { key: 'healthCenter', badgeKey: 'home.account.healthCenter.badge', titleKey: 'home.account.healthCenter.title', textKey: 'home.account.healthCenter.text' },
+    { key: 'admin', badgeKey: 'home.account.admin.badge', titleKey: 'home.account.admin.title', textKey: 'home.account.admin.text' }
+];
+
 type TipPhase = 'before' | 'during' | 'after';
 
 interface HomeTip {
@@ -258,7 +264,12 @@ const HomePage: React.FC = () => {
                     <p className="hero__text">{t('home.text')}</p>
                     <div className="hero__actions">
                         {isAuthenticated ? (
-                            <div className="hero__welcome-chip">{t('nav.welcomeUser', { name: user?.fullName || '' })}</div>
+                            <>
+                                <div className="hero__welcome-chip">{t('nav.welcomeUser', { name: user?.fullName || '' })}</div>
+                                {user?.role === 'admin' ? <Link to="/admin" className="button button--secondary">{t('home.openAdmin')}</Link> : null}
+                                {user?.role === 'health-center' ? <Link to="/health-center" className="button button--secondary">{t('home.openHealthCenter')}</Link> : null}
+                                {user?.role === 'citizen' ? <Link to="/dashboard" className="button button--secondary">{t('home.openDashboard')}</Link> : null}
+                            </>
                         ) : (
                             <>
                                 <Link to="/register" className="button button--primary">{t('home.createAccount')}</Link>
@@ -304,6 +315,23 @@ const HomePage: React.FC = () => {
                             <span className="home-feature-card__icon" aria-hidden="true">{feature.icon}</span>
                             <h3>{t(feature.keyTitle)}</h3>
                             <p className="page-copy">{t(feature.keyText)}</p>
+                        </article>
+                    ))}
+                </div>
+            </section>
+
+            <section className="section">
+                <div className="home-why-header">
+                    <span className="hero__eyebrow">{t('home.accountsEyebrow')}</span>
+                    <h3 className="home-section-title">{t('home.accountsTitle')}</h3>
+                    <p className="section-intro">{t('home.accountsSubtitle')}</p>
+                </div>
+                <div className="home-account-grid">
+                    {ACCOUNT_TYPES.map((accountType) => (
+                        <article key={accountType.key} className={`home-account-card home-account-card--${accountType.key}`}>
+                            <span className="home-account-card__badge">{t(accountType.badgeKey)}</span>
+                            <h4>{t(accountType.titleKey)}</h4>
+                            <p>{t(accountType.textKey)}</p>
                         </article>
                     ))}
                 </div>

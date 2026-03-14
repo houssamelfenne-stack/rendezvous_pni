@@ -1,4 +1,5 @@
 import {
+    auditLogsStore as excelAuditLogsStore,
     appointmentsStore as excelAppointmentsStore,
     childrenStore as excelChildrenStore,
     initializeExcelDatabase,
@@ -7,7 +8,7 @@ import {
     vaccinesStore as excelVaccinesStore
 } from './excelDatabase';
 import { createPostgresDatabase } from './postgresDatabase';
-import { createId } from './shared';
+import { createId, ensureDefaultVaccines } from './shared';
 import { AppDatabase } from './types';
 import { ensureSuperAdminAccount } from '../utils/bootstrapSuperAdmin';
 
@@ -57,6 +58,14 @@ const createExcelDatabase = (): AppDatabase => ({
         async save(rows) {
             excelVaccineDosesStore.save(rows);
         }
+    },
+    auditLogsStore: {
+        async list() {
+            return excelAuditLogsStore.list();
+        },
+        async save(rows) {
+            excelAuditLogsStore.save(rows);
+        }
     }
 });
 
@@ -91,6 +100,7 @@ export const initializeDatabase = async () => {
     }
 
     await activeDatabase.initialize();
+    await ensureDefaultVaccines(activeDatabase);
     await ensureSuperAdminAccount(activeDatabase);
     return activeDatabase;
 };

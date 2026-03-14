@@ -21,11 +21,11 @@ const RegisterForm: React.FC = () => {
 
     const getRegistrationErrorMessage = (err: unknown) => {
         if (!axios.isAxiosError(err)) {
-            return 'تعذر إنشاء الحساب. حاول مرة أخرى.';
+            return t('auth.registerErrorGeneric');
         }
 
         if (!err.response) {
-            return 'خدمة التسجيل غير متاحة حالياً. تأكد من تشغيل الخادم ثم أعد المحاولة.';
+            return t('auth.registerServiceUnavailable');
         }
 
         const responseData = err.response.data as {
@@ -40,7 +40,7 @@ const RegisterForm: React.FC = () => {
                 .join(' ');
         }
 
-        return responseData.message || 'تعذر إنشاء الحساب. راجع البيانات ثم أعد المحاولة.';
+        return responseData.message || t('auth.registerRetry');
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -72,10 +72,10 @@ const RegisterForm: React.FC = () => {
                 </select>
             </label>
             <FormInput label={t('auth.dateOfBirth')} type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} required />
-            <FormInput label={t('auth.nationalId')} value={nationalId} onChange={(e) => setNationalId(e.target.value)} required />
+            <FormInput label={t('auth.nationalId')} value={nationalId} onChange={(e) => setNationalId(e.target.value)} placeholder={t('auth.nationalIdPlaceholder')} required />
             <FormInput label={t('auth.address')} value={address} onChange={(e) => setAddress(e.target.value)} required />
             <FormInput label={t('auth.phoneNumber')} type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required />
-            <FormInput label={t('auth.password')} type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <FormInput label={t('auth.password')} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t('auth.passwordPlaceholder')} required />
             <button type="submit">{t('auth.registerButton')}</button>
         </form>
     );

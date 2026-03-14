@@ -12,6 +12,8 @@ export interface PniDoseScheduleEntry extends PniDoseDefinition {
     scheduledDateIso: string;
 }
 
+export const EXCLUSIVE_PNI_ANTIGEN_GROUPS = [['HBn', 'HB1']];
+
 export const PNI_ANTIGEN_ALIASES: Record<string, string> = {
     HB1n: 'HBn',
     Pneumo1: 'PCV1',
@@ -91,4 +93,27 @@ export const buildPniSchedule = (birthDate: string): PniDoseScheduleEntry[] => {
         scheduledDate: formatDate(addDays(baseDate, dose.offsetDays)),
         scheduledDateIso: formatIsoDate(addDays(baseDate, dose.offsetDays))
     }));
+};
+
+export const buildCompletedPniDoseKeys = (
+    completedDoses: Array<Pick<PniDoseScheduleEntry, 'antigen' | 'offsetDays'>>
+) => new Set(completedDoses.map((dose) => `${normalizePniAntigen(dose.antigen)}:${dose.offsetDays}`));
+
+export const filterExclusivePniDoses = <TDose extends Pick<PniDoseScheduleEntry, 'antigen' | 'offsetDays'>>(
+    doses: TDose[],
+    completedDoseKeys: Set<string>
+) => {
+    return doses.filter((dose) => {
+        const normalizedAntigen = normalizePniAntigen(dose.antigen);
+
+        return !EXCLUSIVE_PNI_ANTIGEN_GROUPS.some((group) => {
+            if (!group.includes(normalizedAntigen)) {
+                return false;
+            }
+
+            return group
+                .filter((antigen) => antigen !== normalizedAntigen)
+                .some((antigen) => completedDoseKeys.has(`${antigen}:${dose.offsetDays}`) || completedDoseKeys.has(`${antigen}:0`) || completedDoseKeys.has(`${antigen}:28`));
+        });
+    });
 };

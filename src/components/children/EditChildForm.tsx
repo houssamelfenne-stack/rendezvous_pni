@@ -21,7 +21,7 @@ const EditChildForm: React.FC = () => {
                 const data = await response.json();
                 setChild(data);
             } catch (err) {
-                setError('Failed to fetch child data');
+                setError('children.fetchChildError');
             } finally {
                 setLoading(false);
             }
@@ -43,13 +43,13 @@ const EditChildForm: React.FC = () => {
                 await updateChild(child.id, child);
                 history.push('/children');
             } catch (err) {
-                setError('Failed to update child information');
+                setError('children.updateChildInfoError');
             }
         }
     };
 
     if (loading) return <div>{t('appointments.loading')}</div>;
-    if (error) return <div>{error}</div>;
+    if (error) return <div>{t(error)}</div>;
 
     return (
         <form onSubmit={handleSubmit}>

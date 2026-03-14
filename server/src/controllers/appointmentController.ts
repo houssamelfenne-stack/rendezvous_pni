@@ -57,8 +57,24 @@ export const getAppointments = async (req: AuthenticatedRequest, res: Response) 
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        const appointments = (await getDatabase().appointmentsStore.list()).filter((entry) => entry.userId === req.user?.id);
-        res.status(200).json(appointments);
+        const database = getDatabase();
+        const [appointments, children, vaccines] = await Promise.all([
+            database.appointmentsStore.list(),
+            database.childrenStore.list(),
+            database.vaccinesStore.list()
+        ]);
+
+        const childrenById = new Map(children.map((child) => [child.id, child]));
+        const vaccinesById = new Map(vaccines.map((vaccine) => [vaccine.id, vaccine]));
+        const scopedAppointments = appointments
+            .filter((entry) => entry.userId === req.user?.id)
+            .map((appointment) => ({
+                ...appointment,
+                childName: childrenById.get(appointment.childId)?.fullName,
+                vaccine: vaccinesById.get(appointment.vaccineId)?.name
+            }));
+
+        res.status(200).json(scopedAppointments);
     } catch (error: any) {
         res.status(500).json({ message: error.message });
     }

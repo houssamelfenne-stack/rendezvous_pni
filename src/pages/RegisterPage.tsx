@@ -7,7 +7,7 @@ import FormInput from '../components/common/FormInput';
 import { GENDER_OPTIONS } from '../utils/genderOptions';
 
 const RegisterPage: React.FC = () => {
-    const { language, t } = useAppPreferences();
+    const { t } = useAppPreferences();
     const [fullName, setFullName] = useState('');
     const [gender, setGender] = useState('');
     const [dateOfBirth, setDateOfBirth] = useState('');
@@ -20,15 +20,15 @@ const RegisterPage: React.FC = () => {
 
     const mapRegistrationMessage = (message?: string) => {
         if (!message) {
-            return 'تعذر إنشاء الحساب. راجع البيانات ثم أعد المحاولة.';
+            return t('auth.registerRetry');
         }
 
         if (message === 'User already exists') {
-            return 'يوجد حساب مسجل بهذا الرقم الوطني من قبل.';
+            return t('auth.registerExists');
         }
 
         if (message === 'Error registering user') {
-            return 'حدث خطأ أثناء إنشاء الحساب. أعد المحاولة بعد قليل.';
+            return t('auth.registerServerError');
         }
 
         return message;
@@ -40,31 +40,31 @@ const RegisterPage: React.FC = () => {
         }
 
         if (message === 'Full name is required') {
-            return 'الاسم الكامل مطلوب.';
+            return t('auth.validation.fullNameRequired');
         }
 
         if (message === 'Gender must be male, female, or other') {
-            return 'يرجى اختيار النوع بشكل صحيح.';
+            return t('auth.validation.genderInvalid');
         }
 
         if (message === 'Date of birth must be a valid date') {
-            return 'تاريخ الازدياد غير صالح.';
+            return t('auth.validation.birthDateInvalid');
         }
 
         if (message === 'National ID number is required') {
-            return 'رقم البطاقة الوطنية مطلوب.';
+            return t('auth.validation.nationalIdRequired');
         }
 
         if (message === 'Address is required') {
-            return 'العنوان مطلوب.';
+            return t('auth.validation.addressRequired');
         }
 
         if (message === 'Phone number must be valid') {
-            return 'رقم الهاتف غير صالح.';
+            return t('auth.validation.phoneInvalid');
         }
 
         if (message === 'Password must be at least 6 characters long') {
-            return 'كلمة المرور يجب أن تتكون من 6 أحرف على الأقل.';
+            return t('auth.validation.passwordShort');
         }
 
         return message;
@@ -72,11 +72,11 @@ const RegisterPage: React.FC = () => {
 
     const getRegistrationErrorMessage = (err: unknown) => {
         if (!axios.isAxiosError(err)) {
-            return 'تعذر إنشاء الحساب. حاول مرة أخرى.';
+            return t('auth.registerErrorGeneric');
         }
 
         if (!err.response) {
-            return 'خدمة التسجيل غير متاحة حالياً. تأكد من تشغيل الخادم ثم أعد المحاولة.';
+            return t('auth.registerServiceUnavailable');
         }
 
         const responseData = err.response.data as {
@@ -111,6 +111,21 @@ const RegisterPage: React.FC = () => {
         <div className="register-page auth-card">
             <h2>{t('auth.registerTitle')}</h2>
             <p className="page-copy">{t('auth.registerIntro')}</p>
+            <p className="page-copy">{t('auth.citizenOnlyNotice')}</p>
+            <div className="auth-role-grid">
+                <article className="auth-role-card auth-role-card--citizen">
+                    <strong>{t('role.citizen')}</strong>
+                    <span>{t('auth.roleCitizenDesc')}</span>
+                </article>
+                <article className="auth-role-card auth-role-card--center">
+                    <strong>{t('role.health-center')}</strong>
+                    <span>{t('auth.roleHealthCenterDesc')}</span>
+                </article>
+                <article className="auth-role-card auth-role-card--admin">
+                    <strong>{t('role.admin')}</strong>
+                    <span>{t('auth.roleAdminDesc')}</span>
+                </article>
+            </div>
             {error && <p className="error">{error}</p>}
             <form onSubmit={handleSubmit}>
                 <FormInput label={t('auth.fullName')} value={fullName} onChange={(e) => setFullName(e.target.value)} required />
@@ -120,7 +135,7 @@ const RegisterPage: React.FC = () => {
                         <option value="">{t('auth.selectGender')}</option>
                         {GENDER_OPTIONS.map((option) => (
                             <option key={option.value} value={option.value}>
-                                {language === 'ar' ? t(`gender.${option.value}`) : t(`gender.${option.value}`)}
+                                {t(`gender.${option.value}`)}
                             </option>
                         ))}
                     </select>

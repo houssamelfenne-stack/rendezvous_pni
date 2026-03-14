@@ -1,9 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import XLSX from 'xlsx';
-import { AppointmentRecord, ChildRecord, DatabaseShape, UserRecord, VaccineDoseRecord, VaccineRecord } from '../types/entities';
+import { AppointmentRecord, AuditLogRecord, ChildRecord, DatabaseShape, UserRecord, VaccineDoseRecord, VaccineRecord } from '../types/entities';
+import { defaultVaccines } from './shared';
 
-type SheetName = 'users' | 'children' | 'appointments' | 'vaccines' | 'vaccineDoses';
+type SheetName = 'users' | 'children' | 'appointments' | 'vaccines' | 'vaccineDoses' | 'auditLogs';
 
 const dataDirectory = path.resolve(__dirname, '../../data');
 const workbookPath = path.join(dataDirectory, 'vaccination-data.xlsx');
@@ -13,43 +14,26 @@ const sheetNames: Record<SheetName, string> = {
     children: 'Children',
     appointments: 'Appointments',
     vaccines: 'Vaccines',
-    vaccineDoses: 'VaccineDoses'
+    vaccineDoses: 'VaccineDoses',
+    auditLogs: 'AuditLogs'
 };
-
-const defaultVaccines: VaccineRecord[] = [
-    {
-        id: 'vaccine-bcg',
-        name: 'BCG',
-        description: 'لقاح ضد السل يعطى خلال أول 4 أسابيع بعد الولادة.',
-        ageGroup: 'حديثو الولادة',
-        schedule: ['خلال أول 4 أسابيع بعد الولادة'],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-    },
-    {
-        id: 'vaccine-pentavalent',
-        name: 'Pentavalent',
-        description: 'لقاح مركب ضد عدة أمراض في الجرعات الأولى.',
-        ageGroup: 'الرضع',
-        schedule: ['8 أسابيع', '12 أسبوعاً', '16 أسبوعاً'],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-    },
-    {
-        id: 'vaccine-mmr',
-        name: 'MMR',
-        description: 'لقاح الحصبة والنكاف والحصبة الألمانية.',
-        ageGroup: 'الأطفال',
-        schedule: ['9 أشهر', '18 شهراً'],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-    }
-];
 
 const normalizeUser = (record: Partial<UserRecord>): UserRecord => ({
     id: String(record.id || createId('user')),
     fullName: String(record.fullName || ''),
-    role: record.role === 'super-admin' ? 'super-admin' : 'user',
+    role: (() => {
+        const rawRole = String((record as Partial<UserRecord> & { role?: string }).role || '');
+
+        if (rawRole === 'admin' || rawRole === 'super-admin') {
+            return 'admin';
+        }
+
+        if (rawRole === 'health-center') {
+            return 'health-center';
+        }
+
+        return 'citizen';
+    })(),
     isActive: record.isActive === false ? false : true,
     gender: (record.gender === 'male' || record.gender === 'female' || record.gender === 'other' ? record.gender : 'other'),
     dateOfBirth: String(record.dateOfBirth || ''),
@@ -83,7 +67,8 @@ const createWorkbook = () => {
         children: [],
         appointments: [],
         vaccines: defaultVaccines,
-        vaccineDoses: []
+        vaccineDoses: [],
+        auditLogs: []
     };
 
     (Object.keys(sheetNames) as SheetName[]).forEach((sheetKey) => {
@@ -191,4 +176,9 @@ export const vaccinesStore = {
 export const vaccineDosesStore = {
     list: () => readSheet<VaccineDoseRecord>('vaccineDoses'),
     save: (rows: VaccineDoseRecord[]) => writeSheet('vaccineDoses', rows)
+};
+
+export const auditLogsStore = {
+    list: () => readSheet<AuditLogRecord>('auditLogs'),
+    save: (rows: AuditLogRecord[]) => writeSheet('auditLogs', rows)
 };

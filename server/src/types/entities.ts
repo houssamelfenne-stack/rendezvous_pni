@@ -1,4 +1,4 @@
-export type UserRole = 'user' | 'super-admin';
+export type UserRole = 'citizen' | 'health-center' | 'admin';
 
 export interface UserRecord {
     id: string;
@@ -36,6 +36,9 @@ export interface AppointmentRecord {
     vaccineId: string;
     notes?: string;
     status?: string;
+    notificationDate?: string;
+    notificationSentAt?: string;
+    notificationMessage?: string;
     createdAt: string;
     updatedAt: string;
 }
@@ -61,10 +64,22 @@ export interface VaccineDoseRecord {
     updatedAt: string;
 }
 
+export interface AuditLogRecord {
+    id: string;
+    actorUserId: string;
+    actorRole: UserRole;
+    action: string;
+    entityType: 'user' | 'child' | 'appointment' | 'system';
+    entityId: string;
+    message: string;
+    createdAt: string;
+}
+
 export interface DatabaseShape {
     users: UserRecord[];
     children: ChildRecord[];
     appointments: AppointmentRecord[];
     vaccines: VaccineRecord[];
     vaccineDoses: VaccineDoseRecord[];
+    auditLogs: AuditLogRecord[];
 }

@@ -22,7 +22,7 @@ const useAppointments = (enabled = true) => {
                 setAppointments(data);
                 setError(null);
             } catch (err) {
-                setError('Failed to fetch appointments');
+                setError('appointments.fetchErrorShort');
             } finally {
                 setLoading(false);
             }
@@ -36,7 +36,7 @@ const useAppointments = (enabled = true) => {
             const newAppointment = await createAppointment(appointment);
             setAppointments((prev) => [...prev, newAppointment]);
         } catch (err) {
-            setError('Failed to create appointment');
+            setError('appointments.createErrorShort');
         }
     };
 
@@ -45,7 +45,7 @@ const useAppointments = (enabled = true) => {
             await deleteAppointment(id);
             setAppointments((prev) => prev.filter((appointment) => appointment.id !== id));
         } catch (err) {
-            setError('Failed to delete appointment');
+            setError('appointments.deleteErrorShort');
         }
     };
 

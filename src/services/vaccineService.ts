@@ -1,6 +1,6 @@
 import api from './api';
 import { Vaccine } from '../types/Vaccine';
-import { VaccineDoseRecord } from '../types/VaccineDose';
+import { VaccineDoseNotification, VaccineDoseRecord } from '../types/VaccineDose';
 
 const API_URL = '/vaccines';
 
@@ -38,5 +38,10 @@ export const saveChildVaccineDose = async (
     doseData: { antigen: string; offsetDays: number; completedDate: string }
 ): Promise<VaccineDoseRecord | { removed: true }> => {
     const response = await api.put<VaccineDoseRecord | { removed: true }>(`/vaccine-doses/child/${childId}`, doseData);
+    return response.data;
+};
+
+export const getMyVaccineDoseNotifications = async (): Promise<VaccineDoseNotification[]> => {
+    const response = await api.get<VaccineDoseNotification[]>('/vaccine-doses/notifications');
     return response.data;
 };

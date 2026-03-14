@@ -20,8 +20,32 @@ export interface AdminChild extends Child {
 
 export interface AdminAppointment extends Appointment {
     userId: string;
+    userName?: string;
+    user?: AdminUser | null;
     createdAt: string;
     updatedAt: string;
+}
+
+export interface AdminVaccineDose {
+    id: string;
+    userId: string;
+    childId: string;
+    antigen: string;
+    offsetDays: number;
+    completedDate: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface AdminAuditLog {
+    id: string;
+    actorUserId: string;
+    actorRole: UserRole;
+    action: string;
+    entityType: 'user' | 'child' | 'appointment' | 'system';
+    entityId: string;
+    message: string;
+    createdAt: string;
 }
 
 export interface CreateAdminUserPayload {
@@ -85,6 +109,16 @@ export const deleteAdminChild = async (id: string) => {
 
 export const getAdminAppointments = async (): Promise<AdminAppointment[]> => {
     const response = await api.get('/admin/appointments');
+    return response.data;
+};
+
+export const getAdminVaccineDoses = async (): Promise<AdminVaccineDose[]> => {
+    const response = await api.get('/admin/vaccine-doses');
+    return response.data;
+};
+
+export const getAdminAuditLogs = async (): Promise<AdminAuditLog[]> => {
+    const response = await api.get('/admin/audit-logs');
     return response.data;
 };
 

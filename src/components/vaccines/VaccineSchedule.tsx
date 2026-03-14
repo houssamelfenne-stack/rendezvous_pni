@@ -2,17 +2,17 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAppPreferences } from '../../context/AppPreferencesContext';
 import { useAuth } from '../../context/AuthContext';
 import { useChildren } from '../../hooks/useChildren';
-import { buildPniSchedule, DEFAULT_PNI_BIRTH_DATE, normalizePniAntigen } from '../../utils/pniSchedule';
+import { buildPniSchedule, DEFAULT_PNI_BIRTH_DATE, EXCLUSIVE_PNI_ANTIGEN_GROUPS, normalizePniAntigen } from '../../utils/pniSchedule';
 import { getChildVaccineDoses, saveChildVaccineDose } from '../../services/vaccineService';
-
-const EXCLUSIVE_ANTIGEN_GROUPS = [['HBn', 'HB1']];
+import { getHealthCenterChildren } from '../../services/healthCenterService';
+import { Child } from '../../types/Child';
 
 const getDoseKey = (antigen: string, offsetDays: number) => `${antigen}-${offsetDays}`;
 
 const normalizeExclusiveCompletedDates = (completedDates: Record<string, string>, schedule: ReturnType<typeof buildPniSchedule>) => {
     const nextValue = { ...completedDates };
 
-    EXCLUSIVE_ANTIGEN_GROUPS.forEach((group) => {
+    EXCLUSIVE_PNI_ANTIGEN_GROUPS.forEach((group) => {
         const completedKeys = group
             .map((antigen) => schedule.find((dose) => dose.antigen === antigen))
             .filter((dose): dose is ReturnType<typeof buildPniSchedule>[number] => Boolean(dose))
@@ -47,13 +47,45 @@ const formatInputDate = (value: string) => {
 
 const VaccineSchedule: React.FC = () => {
     const { isRtl, t } = useAppPreferences();
-    const { isAuthenticated } = useAuth();
-    const { children, loading, error } = useChildren(isAuthenticated);
+    const { isAuthenticated, user } = useAuth();
+    const { children: citizenChildren, loading: citizenLoading, error: citizenError } = useChildren(isAuthenticated && user?.role === 'citizen');
+    const [healthCenterChildren, setHealthCenterChildren] = useState<Child[]>([]);
+    const [healthCenterLoading, setHealthCenterLoading] = useState(false);
+    const [healthCenterError, setHealthCenterError] = useState<string | null>(null);
     const [selectedChildId, setSelectedChildId] = useState('manual');
     const [birthDate, setBirthDate] = useState(DEFAULT_PNI_BIRTH_DATE);
     const [completedDoseDates, setCompletedDoseDates] = useState<Record<string, string>>({});
     const [trackingError, setTrackingError] = useState('');
     const [trackingLoading, setTrackingLoading] = useState(false);
+
+    useEffect(() => {
+        const loadHealthCenterChildren = async () => {
+            if (!isAuthenticated || (user?.role !== 'health-center' && user?.role !== 'admin')) {
+                setHealthCenterChildren([]);
+                setHealthCenterError(null);
+                setHealthCenterLoading(false);
+                return;
+            }
+
+            try {
+                setHealthCenterLoading(true);
+                const children = await getHealthCenterChildren();
+                setHealthCenterChildren(children);
+                setHealthCenterError(null);
+            } catch {
+                setHealthCenterChildren([]);
+                setHealthCenterError('vaccine.healthCenterChildrenError');
+            } finally {
+                setHealthCenterLoading(false);
+            }
+        };
+
+        void loadHealthCenterChildren();
+    }, [isAuthenticated, user?.role]);
+
+    const children = user?.role === 'health-center' || user?.role === 'admin' ? healthCenterChildren : citizenChildren;
+    const loading = user?.role === 'health-center' || user?.role === 'admin' ? healthCenterLoading : citizenLoading;
+    const error = user?.role === 'health-center' || user?.role === 'admin' ? healthCenterError : citizenError;
 
     const effectiveBirthDate = birthDate || DEFAULT_PNI_BIRTH_DATE;
     const schedule = useMemo(() => buildPniSchedule(effectiveBirthDate), [effectiveBirthDate]);
@@ -76,7 +108,7 @@ const VaccineSchedule: React.FC = () => {
 
                     setCompletedDoseDates(normalizeExclusiveCompletedDates(mappedRecords, schedule));
                 } catch (loadError) {
-                    setTrackingError('تعذر تحميل الجرعات المنجزة من الخادم.');
+                    setTrackingError('vaccine.loadDoseError');
                     setCompletedDoseDates({});
                 } finally {
                     setTrackingLoading(false);
@@ -148,7 +180,7 @@ const VaccineSchedule: React.FC = () => {
         const currentDose = schedule.find((dose) => getDoseKey(dose.antigen, dose.offsetDays) === doseKey);
 
         if (currentDose && value) {
-            EXCLUSIVE_ANTIGEN_GROUPS.forEach((group) => {
+            EXCLUSIVE_PNI_ANTIGEN_GROUPS.forEach((group) => {
                 if (!group.includes(currentDose.antigen)) {
                     return;
                 }
@@ -197,7 +229,7 @@ const VaccineSchedule: React.FC = () => {
                 completedDate: value
             });
 
-            const siblingGroup = EXCLUSIVE_ANTIGEN_GROUPS.find((group) => group.includes(currentDose.antigen));
+            const siblingGroup = EXCLUSIVE_PNI_ANTIGEN_GROUPS.find((group) => group.includes(currentDose.antigen));
 
             if (siblingGroup && value) {
                 const siblingDose = siblingGroup
@@ -215,7 +247,7 @@ const VaccineSchedule: React.FC = () => {
             }
         } catch (saveError) {
             setCompletedDoseDates(previousValue);
-            setTrackingError('تعذر حفظ تاريخ الجرعة في الخادم.');
+            setTrackingError('vaccine.saveDoseError');
         } finally {
             setTrackingLoading(false);
         }
@@ -223,7 +255,7 @@ const VaccineSchedule: React.FC = () => {
 
     const todayIso = getTodayIso();
     const visibleSchedule = schedule.filter((dose) => {
-        const matchingGroup = EXCLUSIVE_ANTIGEN_GROUPS.find((group) => group.includes(dose.antigen));
+        const matchingGroup = EXCLUSIVE_PNI_ANTIGEN_GROUPS.find((group) => group.includes(dose.antigen));
 
         if (!matchingGroup) {
             return true;
@@ -296,8 +328,8 @@ const VaccineSchedule: React.FC = () => {
             </div>
 
             {loading || trackingLoading ? <p className="page-copy">{t('vaccine.loading')}</p> : null}
-            {error ? <p className="error">{error}</p> : null}
-            {trackingError ? <p className="error">{trackingError}</p> : null}
+            {error ? <p className="error">{t(error)}</p> : null}
+            {trackingError ? <p className="error">{t(trackingError)}</p> : null}
 
             <div className="vaccine-schedule-table-wrapper">
                 <table className="vaccine-schedule-table">

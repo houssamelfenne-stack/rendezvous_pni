@@ -4,9 +4,10 @@ import { useHistory } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useAppPreferences } from '../context/AppPreferencesContext';
 import FormInput from '../components/common/FormInput';
+import { authService } from '../services/authService';
 
 const LoginPage: React.FC = () => {
-    const { login, isAuthenticated } = useAuth();
+    const { login, isAuthenticated, user } = useAuth();
     const { t } = useAppPreferences();
     const [nationalId, setNationalId] = useState('');
     const [password, setPassword] = useState('');
@@ -15,21 +16,31 @@ const LoginPage: React.FC = () => {
 
     useEffect(() => {
         if (isAuthenticated) {
-            history.replace('/');
+            if (user?.role === 'admin') {
+                history.replace('/admin');
+                return;
+            }
+
+            if (user?.role === 'health-center') {
+                history.replace('/health-center');
+                return;
+            }
+
+            history.replace('/dashboard');
         }
-    }, [history, isAuthenticated]);
+    }, [history, isAuthenticated, user]);
 
     const getLoginErrorMessage = (err: unknown) => {
         if (!axios.isAxiosError(err)) {
-            return 'تعذر تسجيل الدخول. حاول مرة أخرى.';
+            return t('auth.loginErrorGeneric');
         }
 
         if (!err.response) {
-            return 'خدمة تسجيل الدخول غير متاحة حالياً. تأكد من تشغيل الخادم ثم أعد المحاولة.';
+            return t('auth.loginServiceUnavailable');
         }
 
         const responseData = err.response.data as { message?: string };
-        return responseData.message || 'تعذر تسجيل الدخول. تحقق من رقم البطاقة الوطنية وكلمة المرور.';
+        return responseData.message || t('auth.loginInvalidCredentials');
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -38,7 +49,15 @@ const LoginPage: React.FC = () => {
 
         try {
             await login(nationalId, password);
-            history.replace('/');
+            const currentUser = authService.getCurrentUser();
+
+            if (currentUser?.role === 'admin') {
+                history.replace('/admin');
+            } else if (currentUser?.role === 'health-center') {
+                history.replace('/health-center');
+            } else {
+                history.replace('/dashboard');
+            }
         } catch (err) {
             setError(getLoginErrorMessage(err));
         }
@@ -49,6 +68,20 @@ const LoginPage: React.FC = () => {
             <div className="login-page auth-card">
             <h2>{t('auth.loginTitle')}</h2>
             <p className="page-copy">{t('auth.loginIntro')}</p>
+            <div className="auth-role-grid">
+                <article className="auth-role-card auth-role-card--citizen">
+                    <strong>{t('role.citizen')}</strong>
+                    <span>{t('auth.loginRoleCitizenDesc')}</span>
+                </article>
+                <article className="auth-role-card auth-role-card--center">
+                    <strong>{t('role.health-center')}</strong>
+                    <span>{t('auth.loginRoleHealthCenterDesc')}</span>
+                </article>
+                <article className="auth-role-card auth-role-card--admin">
+                    <strong>{t('role.admin')}</strong>
+                    <span>{t('auth.loginRoleAdminDesc')}</span>
+                </article>
+            </div>
             <form onSubmit={handleSubmit}>
                 {error && <p className="error">{error}</p>}
                 <FormInput

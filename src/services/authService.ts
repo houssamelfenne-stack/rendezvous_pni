@@ -3,6 +3,18 @@ import { LoginCredentials, RegisterUserData, User } from '../types/User';
 
 const API_URL = `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/auth/`;
 
+const normalizeUserRole = (role?: string): User['role'] => {
+    if (role === 'admin' || role === 'super-admin') {
+        return 'admin';
+    }
+
+    if (role === 'health-center') {
+        return 'health-center';
+    }
+
+    return 'citizen';
+};
+
 const persistUser = (user: User | null) => {
     if (user) {
         localStorage.setItem('user', JSON.stringify(user));
@@ -25,7 +37,7 @@ export const login = async (nationalId: string, password: string) => {
         password,
         token: response.data.token,
         fullName: response.data.fullName || '',
-        role: response.data.role === 'super-admin' ? 'super-admin' : 'user',
+        role: normalizeUserRole(response.data.role),
         isActive: response.data.isActive !== false,
         gender: (response.data.gender || 'other') as User['gender'],
         dateOfBirth: response.data.dateOfBirth || '',
@@ -51,7 +63,7 @@ export const getCurrentUser = (): User | null => {
     const parsedUser = JSON.parse(rawUser) as Partial<User>;
     return {
         fullName: parsedUser.fullName || '',
-        role: parsedUser.role === 'super-admin' ? 'super-admin' : 'user',
+        role: normalizeUserRole(parsedUser.role),
         isActive: parsedUser.isActive !== false,
         gender: (parsedUser.gender || 'other') as User['gender'],
         dateOfBirth: parsedUser.dateOfBirth || '',

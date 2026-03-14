@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { AppointmentRecord, ChildRecord, UserRecord, VaccineDoseRecord, VaccineRecord } from '../types/entities';
+import { AppointmentRecord, AuditLogRecord, ChildRecord, UserRecord, VaccineDoseRecord, VaccineRecord } from '../types/entities';
 import { defaultVaccines } from './shared';
 import { AppDatabase, EntityStore } from './types';
 
@@ -65,7 +65,11 @@ const usersMapper: RowMapper<UserRecord> = {
     fromRow: (row) => ({
         id: row.id,
         fullName: row.full_name,
-        role: row.role === 'super-admin' ? 'super-admin' : 'user',
+        role: row.role === 'admin' || row.role === 'super-admin'
+            ? 'admin'
+            : row.role === 'health-center'
+                ? 'health-center'
+                : 'citizen',
         isActive: row.is_active !== false,
         gender: row.gender,
         dateOfBirth: row.date_of_birth,
@@ -128,6 +132,9 @@ const appointmentsMapper: RowMapper<AppointmentRecord> = {
         vaccineId: row.vaccine_id,
         notes: row.notes || undefined,
         status: row.status || undefined,
+        notificationDate: row.notification_date || undefined,
+        notificationSentAt: row.notification_sent_at || undefined,
+        notificationMessage: row.notification_message || undefined,
         createdAt: row.created_at,
         updatedAt: row.updated_at
     }),
@@ -139,6 +146,9 @@ const appointmentsMapper: RowMapper<AppointmentRecord> = {
         vaccine_id: row.vaccineId,
         notes: row.notes ?? null,
         status: row.status ?? null,
+        notification_date: row.notificationDate ?? null,
+        notification_sent_at: row.notificationSentAt ?? null,
+        notification_message: row.notificationMessage ?? null,
         created_at: row.createdAt,
         updated_at: row.updatedAt
     })
@@ -185,6 +195,33 @@ const vaccineDosesMapper: RowMapper<VaccineDoseRecord> = {
         completed_date: row.completedDate,
         created_at: row.createdAt,
         updated_at: row.updatedAt
+    })
+};
+
+const auditLogsMapper: RowMapper<AuditLogRecord> = {
+    fromRow: (row) => ({
+        id: row.id,
+        actorUserId: row.actor_user_id,
+        actorRole: row.actor_role === 'admin' || row.actor_role === 'super-admin'
+            ? 'admin'
+            : row.actor_role === 'health-center'
+                ? 'health-center'
+                : 'citizen',
+        action: row.action,
+        entityType: row.entity_type,
+        entityId: row.entity_id,
+        message: row.message,
+        createdAt: row.created_at
+    }),
+    toRow: (row) => ({
+        id: row.id,
+        actor_user_id: row.actorUserId,
+        actor_role: row.actorRole,
+        action: row.action,
+        entity_type: row.entityType,
+        entity_id: row.entityId,
+        message: row.message,
+        created_at: row.createdAt
     })
 };
 
@@ -258,10 +295,17 @@ export const createPostgresDatabase = (): AppDatabase => {
                     vaccine_id TEXT NOT NULL REFERENCES vaccines(id) ON DELETE RESTRICT,
                     notes TEXT,
                     status TEXT,
+                    notification_date TEXT,
+                    notification_sent_at TEXT,
+                    notification_message TEXT,
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL
                 )
             `);
+
+            await pool.query(`ALTER TABLE appointments ADD COLUMN IF NOT EXISTS notification_date TEXT`);
+            await pool.query(`ALTER TABLE appointments ADD COLUMN IF NOT EXISTS notification_sent_at TEXT`);
+            await pool.query(`ALTER TABLE appointments ADD COLUMN IF NOT EXISTS notification_message TEXT`);
 
             await pool.query(`
                 CREATE TABLE IF NOT EXISTS vaccine_doses (
@@ -274,6 +318,19 @@ export const createPostgresDatabase = (): AppDatabase => {
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL,
                     UNIQUE (user_id, child_id, antigen, offset_days)
+                )
+            `);
+
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS audit_logs (
+                    id TEXT PRIMARY KEY,
+                    actor_user_id TEXT NOT NULL,
+                    actor_role TEXT NOT NULL,
+                    action TEXT NOT NULL,
+                    entity_type TEXT NOT NULL,
+                    entity_id TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    created_at TEXT NOT NULL
                 )
             `);
 
@@ -302,6 +359,7 @@ export const createPostgresDatabase = (): AppDatabase => {
         childrenStore: createStore(pool, 'children', childrenMapper),
         appointmentsStore: createStore(pool, 'appointments', appointmentsMapper),
         vaccinesStore: createStore(pool, 'vaccines', vaccinesMapper),
-        vaccineDosesStore: createStore(pool, 'vaccine_doses', vaccineDosesMapper)
+        vaccineDosesStore: createStore(pool, 'vaccine_doses', vaccineDosesMapper),
+        auditLogsStore: createStore(pool, 'audit_logs', auditLogsMapper)
     };
 };

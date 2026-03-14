@@ -6,6 +6,42 @@ interface AuthenticatedRequest extends Request {
     user?: UserRecord;
 }
 
+export const getMyVaccineDoseNotifications = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        const database = getDatabase();
+        const [children, records] = await Promise.all([
+            database.childrenStore.list(),
+            database.vaccineDosesStore.list()
+        ]);
+
+        const scopedChildren = children.filter((child) => child.userId === req.user?.id);
+        const childNamesById = new Map(scopedChildren.map((child) => [child.id, child.fullName]));
+        const childIds = new Set(scopedChildren.map((child) => child.id));
+
+        const notifications = records
+            .filter((record) => childIds.has(record.childId) && Boolean(record.completedDate))
+            .map((record) => ({
+                id: `dose-${record.id}-${record.completedDate}`,
+                childId: record.childId,
+                childName: childNamesById.get(record.childId) || record.childId,
+                antigen: record.antigen,
+                completedDate: record.completedDate,
+                createdAt: record.createdAt,
+                updatedAt: record.updatedAt
+            }))
+            .sort((left, right) => (right.completedDate || '').localeCompare(left.completedDate || '') || (right.updatedAt || '').localeCompare(left.updatedAt || ''))
+            .slice(0, 20);
+
+        return res.status(200).json(notifications);
+    } catch (error: any) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
 export const getChildVaccineDoses = (req: AuthenticatedRequest, res: Response) => {
     try {
         if (!req.user) {
@@ -14,14 +50,14 @@ export const getChildVaccineDoses = (req: AuthenticatedRequest, res: Response) =
 
         const database = getDatabase();
         return database.childrenStore.list().then((children) => {
-            const child = children.find((entry) => entry.id === req.params.childId && entry.userId === req.user?.id);
+            const child = children.find((entry) => entry.id === req.params.childId && (req.user?.role !== 'citizen' || entry.userId === req.user?.id));
 
             if (!child) {
                 return res.status(404).json({ message: 'Child not found' });
             }
 
             return database.vaccineDosesStore.list().then((records) => {
-                return res.status(200).json(records.filter((entry) => entry.userId === req.user?.id && entry.childId === req.params.childId));
+                return res.status(200).json(records.filter((entry) => entry.childId === req.params.childId));
             });
         });
     } catch (error: any) {
@@ -46,7 +82,7 @@ export const upsertChildVaccineDose = async (req: AuthenticatedRequest, res: Res
         }
 
         const database = getDatabase();
-        const child = (await database.childrenStore.list()).find((entry) => entry.id === req.params.childId && entry.userId === req.user?.id);
+        const child = (await database.childrenStore.list()).find((entry) => entry.id === req.params.childId && (req.user?.role !== 'citizen' || entry.userId === req.user?.id));
 
         if (!child) {
             return res.status(404).json({ message: 'Child not found' });
@@ -55,7 +91,7 @@ export const upsertChildVaccineDose = async (req: AuthenticatedRequest, res: Res
         const vaccineDosesStore = database.vaccineDosesStore;
         const records = await vaccineDosesStore.list();
         const recordIndex = records.findIndex(
-            (entry) => entry.userId === req.user?.id && entry.childId === req.params.childId && entry.antigen === antigen && entry.offsetDays === offsetDays
+            (entry) => entry.childId === req.params.childId && entry.antigen === antigen && entry.offsetDays === offsetDays
         );
 
         if (!completedDate) {
@@ -82,7 +118,7 @@ export const upsertChildVaccineDose = async (req: AuthenticatedRequest, res: Res
 
         const newRecord: VaccineDoseRecord = {
             id: createId('vaccineDose'),
-            userId: req.user.id,
+            userId: child.userId,
             childId: req.params.childId,
             antigen,
             offsetDays,

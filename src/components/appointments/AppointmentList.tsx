@@ -19,7 +19,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({ appointments, loading
     }
 
     if (error) {
-        return <div>{t('appointments.error', { error })}</div>;
+        return <div>{t('appointments.error', { error: t(error) })}</div>;
     }
 
     return (

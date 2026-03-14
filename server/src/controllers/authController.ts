@@ -25,7 +25,7 @@ const register = async (req: Request, res: Response) => {
         const newUser: UserRecord = {
             id: createId('user'),
             fullName,
-            role: 'user',
+            role: 'citizen',
             isActive: true,
             gender,
             dateOfBirth,

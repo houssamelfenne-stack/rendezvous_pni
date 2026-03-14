@@ -42,6 +42,9 @@ CREATE TABLE IF NOT EXISTS appointments (
     vaccine_id TEXT NOT NULL REFERENCES vaccines(id) ON DELETE RESTRICT,
     notes TEXT,
     status TEXT,
+    notification_date TEXT,
+    notification_sent_at TEXT,
+    notification_message TEXT,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );

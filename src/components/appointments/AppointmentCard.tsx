@@ -9,6 +9,7 @@ interface AppointmentCardProps {
 
 const AppointmentCard: React.FC<AppointmentCardProps> = ({ appointment }) => {
     const { t } = useAppPreferences();
+    const reminderDate = appointment.notificationDate || appointment.appointmentDate || appointment.date || '';
     const statusLabel = appointment.status === 'overdue'
         ? t('appointments.statusOverdue')
         : appointment.status === 'today'
@@ -29,6 +30,9 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({ appointment }) => {
             {appointment.time && <p>{t('appointments.time')}: {appointment.time}</p>}
             <p>{t('appointments.status')}: {statusLabel}</p>
             <p>{t('appointments.type')}: {appointment.source === 'expected' ? t('appointments.typeExpected') : t('appointments.typeSaved')}</p>
+            {appointment.notificationDate ? <p>{t('appointments.notificationDate')}: {new Date(reminderDate).toLocaleDateString()}</p> : null}
+            {appointment.notificationSentAt ? <p>{t('appointments.notificationSent')}: {new Date(appointment.notificationSentAt).toLocaleString()}</p> : null}
+            {appointment.notificationMessage ? <p>{t('appointments.reminderMessage')}: {appointment.notificationMessage}</p> : null}
             {appointment.notes ? <p>{t('appointments.note')}: {appointment.source === 'expected' ? t('appointments.typeExpected') : appointment.notes}</p> : null}
         </div>
     );
