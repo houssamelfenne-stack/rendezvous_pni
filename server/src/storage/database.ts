@@ -8,12 +8,13 @@ import {
     vaccinesStore as excelVaccinesStore
 } from './excelDatabase';
 import { createPostgresDatabase } from './postgresDatabase';
+import { createSupabaseDatabase } from './supabaseDatabase';
 import { createId, ensureDefaultVaccines } from './shared';
 import { AppDatabase } from './types';
 import { ensureSuperAdminAccount } from '../utils/bootstrapSuperAdmin';
 
 let activeDatabase: AppDatabase | null = null;
-let activeDatabaseProvider: 'excel' | 'postgres' | null = null;
+let activeDatabaseProvider: 'excel' | 'postgres' | 'supabase' | null = null;
 
 const createExcelDatabase = (): AppDatabase => ({
     async initialize() {
@@ -69,8 +70,17 @@ const createExcelDatabase = (): AppDatabase => ({
     }
 });
 
-const resolveDatabaseProvider = (): 'excel' | 'postgres' => {
+const resolveDatabaseProvider = (): 'excel' | 'postgres' | 'supabase' => {
     const configuredProvider = process.env.STORAGE_PROVIDER?.trim().toLowerCase();
+    const hasSupabaseCredentials = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+    if (configuredProvider === 'supabase') {
+        if (!hasSupabaseCredentials) {
+            throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required when STORAGE_PROVIDER=supabase');
+        }
+
+        return 'supabase';
+    }
 
     if (configuredProvider === 'postgres') {
         if (!process.env.DATABASE_URL) {
@@ -82,6 +92,10 @@ const resolveDatabaseProvider = (): 'excel' | 'postgres' => {
 
     if (configuredProvider === 'excel') {
         return 'excel';
+    }
+
+    if (hasSupabaseCredentials) {
+        return 'supabase';
     }
 
     if (process.env.DATABASE_URL) {
@@ -96,7 +110,9 @@ export const initializeDatabase = async () => {
         activeDatabaseProvider = resolveDatabaseProvider();
         activeDatabase = activeDatabaseProvider === 'postgres'
             ? createPostgresDatabase()
-            : createExcelDatabase();
+            : activeDatabaseProvider === 'supabase'
+                ? createSupabaseDatabase()
+                : createExcelDatabase();
     }
 
     await activeDatabase.initialize();

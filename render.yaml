@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: vaccination-calendar-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install && npm run build
+    startCommand: node dist/app.js
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 20.19.0
+      - key: STORAGE_PROVIDER
+        value: supabase
+      - key: JWT_SECRET
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPER_ADMIN_FULL_NAME
+        value: Super Admin
+      - key: SUPER_ADMIN_NATIONAL_ID
+        sync: false
+      - key: SUPER_ADMIN_PASSWORD
+        sync: false
+      - key: SUPER_ADMIN_GENDER
+        value: other
+      - key: SUPER_ADMIN_DATE_OF_BIRTH
+        value: 1990-01-01
+      - key: SUPER_ADMIN_ADDRESS
+        value: Platform Administration
+      - key: SUPER_ADMIN_PHONE_NUMBER
+        value: 0600000000
