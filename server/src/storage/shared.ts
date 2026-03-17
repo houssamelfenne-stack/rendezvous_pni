@@ -47,7 +47,7 @@ export const defaultVaccines: VaccineRecord[] = [
         name: 'Pneumococcal (PCV)',
         description: 'Pneumococcal conjugate vaccination series.',
         ageGroup: '10 weeks to 12 months',
-        schedule: ['10 weeks (PCV1)', '16 weeks (PCV2)', '18 weeks (PCV3)', '12 months (PCV4)'],
+        schedule: ['10 weeks (PCV1)', '18 weeks (PCV2)', '6 months (PCV3)', '12 months (PCV4)'],
         createdAt: timestamp(),
         updatedAt: timestamp()
     },
@@ -64,8 +64,8 @@ export const defaultVaccines: VaccineRecord[] = [
         id: 'vaccine-vpi',
         name: 'Inactivated Polio (VPI)',
         description: 'Inactivated poliovirus booster doses.',
-        ageGroup: '12 weeks and 9 months',
-        schedule: ['12 weeks (VPI1)', '9 months (VPI2)'],
+        ageGroup: '16 weeks and 9 months',
+        schedule: ['16 weeks (VPI1)', '9 months (VPI2)'],
         createdAt: timestamp(),
         updatedAt: timestamp()
     },

@@ -45,7 +45,7 @@ const seedVaccines = async () => {
             name: 'Pneumococcal (PCV)',
             description: 'Pneumococcal conjugate vaccination series.',
             ageGroup: '10 weeks',
-            schedule: ['10 weeks (PCV1)', '16 weeks (PCV2)', '18 weeks (PCV3)', '12 months (PCV4)'],
+            schedule: ['10 weeks (PCV1)', '18 weeks (PCV2)', '6 months (PCV3)', '12 months (PCV4)'],
             createdAt: timestamp,
             updatedAt: timestamp
         },
@@ -62,8 +62,8 @@ const seedVaccines = async () => {
             id: createId('vaccine'),
             name: 'Inactivated Polio (VPI)',
             description: 'Inactivated poliovirus booster doses.',
-            ageGroup: '12 weeks',
-            schedule: ['12 weeks (VPI1)', '9 months (VPI2)'],
+            ageGroup: '16 weeks',
+            schedule: ['16 weeks (VPI1)', '9 months (VPI2)'],
             createdAt: timestamp,
             updatedAt: timestamp
         },

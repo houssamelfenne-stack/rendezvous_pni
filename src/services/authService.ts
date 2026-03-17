@@ -17,11 +17,33 @@ const normalizeUserRole = (role?: string): User['role'] => {
 
 const persistUser = (user: User | null) => {
     if (user) {
-        localStorage.setItem('user', JSON.stringify(user));
+        const { password: _password, ...safeUser } = user;
+        localStorage.setItem('user', JSON.stringify(safeUser));
         return;
     }
 
     localStorage.removeItem('user');
+};
+
+const readStoredUser = (): User | null => {
+    const rawUser = localStorage.getItem('user');
+
+    if (!rawUser) {
+        return null;
+    }
+
+    const parsedUser = JSON.parse(rawUser) as Partial<User>;
+    return {
+        fullName: parsedUser.fullName || '',
+        role: normalizeUserRole(parsedUser.role),
+        isActive: parsedUser.isActive !== false,
+        gender: (parsedUser.gender || 'other') as User['gender'],
+        dateOfBirth: parsedUser.dateOfBirth || '',
+        nationalId: parsedUser.nationalId || '',
+        address: parsedUser.address || '',
+        phoneNumber: parsedUser.phoneNumber || '',
+        token: parsedUser.token
+    };
 };
 
 export const registerUser = async (userData: RegisterUserData) => {
@@ -33,8 +55,7 @@ export const login = async (nationalId: string, password: string) => {
     const credentials: LoginCredentials = { nationalId, password };
     const response = await axios.post(`${API_URL}login`, credentials);
     const user: User = {
-        nationalId,
-        password,
+        nationalId: response.data.nationalId || nationalId,
         token: response.data.token,
         fullName: response.data.fullName || '',
         role: normalizeUserRole(response.data.role),
@@ -53,32 +74,53 @@ export const logout = () => {
     persistUser(null);
 };
 
-export const getCurrentUser = (): User | null => {
-    const rawUser = localStorage.getItem('user');
+export const getStoredUser = (): User | null => {
+    return readStoredUser();
+};
 
-    if (!rawUser) {
+export const getCurrentUser = async (): Promise<User | null> => {
+    const storedUser = readStoredUser();
+
+    if (!storedUser) {
         return null;
     }
 
-    const parsedUser = JSON.parse(rawUser) as Partial<User>;
-    return {
-        fullName: parsedUser.fullName || '',
-        role: normalizeUserRole(parsedUser.role),
-        isActive: parsedUser.isActive !== false,
-        gender: (parsedUser.gender || 'other') as User['gender'],
-        dateOfBirth: parsedUser.dateOfBirth || '',
-        nationalId: parsedUser.nationalId || '',
-        address: parsedUser.address || '',
-        phoneNumber: parsedUser.phoneNumber || '',
-        password: parsedUser.password,
-        token: parsedUser.token
-    };
+    if (!storedUser.token) {
+        return storedUser;
+    }
+
+    try {
+        const response = await axios.get(`${API_URL}profile`, {
+            headers: {
+                Authorization: `Bearer ${storedUser.token}`,
+            },
+        });
+
+        const user: User = {
+            fullName: response.data.fullName || storedUser.fullName,
+            role: normalizeUserRole(response.data.role || storedUser.role),
+            isActive: response.data.isActive !== false,
+            gender: (response.data.gender || storedUser.gender || 'other') as User['gender'],
+            dateOfBirth: response.data.dateOfBirth || storedUser.dateOfBirth,
+            nationalId: response.data.nationalId || storedUser.nationalId,
+            address: response.data.address || storedUser.address,
+            phoneNumber: response.data.phoneNumber || storedUser.phoneNumber,
+            token: storedUser.token
+        };
+
+        persistUser(user);
+        return user;
+    } catch (_error) {
+        persistUser(null);
+        return null;
+    }
 };
 
 export const authService = {
     register: registerUser,
     login,
     logout,
+    getStoredUser,
     getCurrentUser,
 };
 

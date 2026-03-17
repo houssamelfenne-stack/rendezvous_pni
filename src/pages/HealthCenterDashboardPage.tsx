@@ -180,14 +180,15 @@ const HealthCenterDashboardPage: React.FC = () => {
     const normalizedQuery = query.trim().toLowerCase();
 
     const buildSuggestedDoseGroup = (child: AdminChild, preferredAppointmentDate?: string): SuggestedDoseGroup | null => {
-        const completedDoseKeys = new Set(
-            vaccineDoses
-                .filter((dose) => dose.childId === child.id && Boolean(dose.completedDate))
-                .map((dose) => `${normalizePniAntigen(dose.antigen)}:${dose.offsetDays}`)
+        const completedDoseKeys = buildCompletedPniDoseKeys(
+            vaccineDoses.filter((dose) => dose.childId === child.id && Boolean(dose.completedDate))
         );
 
-        const pendingDoses = buildPniSchedule(child.dateOfBirth)
-            .filter((dose) => !completedDoseKeys.has(`${normalizePniAntigen(dose.antigen)}:${dose.offsetDays}`))
+        const pendingDoses = filterExclusivePniDoses(
+            buildPniSchedule(child.dateOfBirth)
+                .filter((dose) => !completedDoseKeys.has(`${normalizePniAntigen(dose.antigen)}:${dose.offsetDays}`)),
+            completedDoseKeys
+        )
             .sort((left, right) => left.scheduledDateIso.localeCompare(right.scheduledDateIso));
 
         if (pendingDoses.length === 0) {

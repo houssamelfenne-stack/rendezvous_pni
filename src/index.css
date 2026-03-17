@@ -507,6 +507,24 @@ button {
 .admin-relance-list {
   display: grid;
   gap: 14px;
+  max-height: min(72vh, 920px);
+  overflow-y: auto;
+  padding-right: 6px;
+  align-content: start;
+}
+
+.admin-relance-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.admin-relance-list::-webkit-scrollbar-thumb {
+  background: rgba(217, 119, 6, 0.35);
+  border-radius: 999px;
+}
+
+.admin-relance-list::-webkit-scrollbar-track {
+  background: rgba(255, 251, 235, 0.5);
+  border-radius: 999px;
 }
 
 .admin-relance-card {
@@ -570,6 +588,10 @@ button {
 
   .admin-dashboard__metrics {
     width: 100%;
+  }
+
+  .admin-relance-list {
+    max-height: 65vh;
   }
 }
 

@@ -125,7 +125,7 @@ const CALENDAR_ROWS: CalendarRow[] = [
         vaccineAr: 'المكورات الرئوية',
         vaccineFr: 'Pneumococcique',
         color: '#2563eb',
-        subRows: [{ labelAr: '', labelFr: '', doses: { w8: { label: 'PCV1' }, w16: { label: 'PCV2' }, w18: { label: 'PCV3' }, m12: { label: 'PCV4' } } }],
+        subRows: [{ labelAr: '', labelFr: '', doses: { w10: { label: 'PCV1' }, w18: { label: 'PCV2' }, m6: { label: 'PCV3' }, m12: { label: 'PCV4' } } }],
     },
     {
         vaccineAr: 'فيروس الروتا',
@@ -137,7 +137,7 @@ const CALENDAR_ROWS: CalendarRow[] = [
         vaccineAr: 'شلل الأطفال المعطل',
         vaccineFr: 'Poliomyélite (Inactive)',
         color: '#fde047',
-        subRows: [{ labelAr: '', labelFr: '', doses: { w12: { label: 'VPI1', highlight: true }, m9: { label: 'VPI2', highlight: true } } }],
+        subRows: [{ labelAr: '', labelFr: '', doses: { w16: { label: 'VPI1', highlight: true }, m9: { label: 'VPI2', highlight: true } } }],
     },
     {
         vaccineAr: 'الحصبة والحصبة الألمانية',

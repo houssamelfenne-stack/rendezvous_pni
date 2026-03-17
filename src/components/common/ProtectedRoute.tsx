@@ -10,14 +10,14 @@ interface ProtectedRouteProps extends RouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ component: Component, requiredRole, requiredRoles, ...rest }) => {
-    const { isAuthenticated, user } = useAuth();
+    const { authReady, isAuthenticated, user } = useAuth();
     const allowedRoles = requiredRoles || (requiredRole ? [requiredRole] : []);
 
     return (
         <Route
             {...rest}
             render={props =>
-                isAuthenticated ? (
+                !authReady ? null : isAuthenticated ? (
                     allowedRoles.length > 0 && !allowedRoles.includes((user?.role || 'citizen') as UserRole) ? (
                         <Redirect to="/dashboard" />
                     ) : (

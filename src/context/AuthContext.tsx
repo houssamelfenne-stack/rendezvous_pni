@@ -5,6 +5,7 @@ import { RegisterUserData, User } from '../types/User';
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  authReady: boolean;
   isAdmin: boolean;
   login: (nationalId: string, password: string) => Promise<void>;
   logout: () => void;
@@ -16,11 +17,16 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
-      const currentUser = await authService.getCurrentUser();
-      setUser(currentUser);
+      try {
+        const currentUser = await authService.getCurrentUser();
+        setUser(currentUser);
+      } finally {
+        setAuthReady(true);
+      }
     };
 
     fetchUser();
@@ -29,17 +35,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (nationalId: string, password: string) => {
     const loggedInUser = await authService.login(nationalId, password);
     setUser(loggedInUser);
+    setAuthReady(true);
   };
 
   const logout = () => {
     authService.logout();
     setUser(null);
+    setAuthReady(true);
   };
 
   const register = async (userData: RegisterUserData) => {
     await authService.register(userData);
     const newUser = await authService.login(userData.nationalId, userData.password);
     setUser(newUser);
+    setAuthReady(true);
   };
 
   const updateUser = (userData: Partial<User>) => {
@@ -55,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: Boolean(user), isAdmin: user?.role === 'admin', login, logout, register, updateUser }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: Boolean(user), authReady, isAdmin: user?.role === 'admin', login, logout, register, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

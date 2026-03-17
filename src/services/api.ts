@@ -8,7 +8,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-    const currentUser = authService.getCurrentUser();
+    const currentUser = authService.getStoredUser();
 
     if (currentUser?.token) {
         config.headers = {

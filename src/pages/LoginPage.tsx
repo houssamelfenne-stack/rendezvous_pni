@@ -4,7 +4,6 @@ import { useHistory } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useAppPreferences } from '../context/AppPreferencesContext';
 import FormInput from '../components/common/FormInput';
-import { authService } from '../services/authService';
 
 const LoginPage: React.FC = () => {
     const { login, isAuthenticated, user } = useAuth();
@@ -49,15 +48,6 @@ const LoginPage: React.FC = () => {
 
         try {
             await login(nationalId, password);
-            const currentUser = authService.getCurrentUser();
-
-            if (currentUser?.role === 'admin') {
-                history.replace('/admin');
-            } else if (currentUser?.role === 'health-center') {
-                history.replace('/health-center');
-            } else {
-                history.replace('/dashboard');
-            }
         } catch (err) {
             setError(getLoginErrorMessage(err));
         }
